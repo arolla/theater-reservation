@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using TheaterReservation.Dao;
 using TheaterReservation.Data;
+using TheaterReservation.Domain;
 
 namespace TheaterReservation
 {
@@ -149,35 +150,34 @@ namespace TheaterReservation
 
             const decimal zero = 0m;
             const decimal one = 1m;
-            decimal adjustedPrice = zero;
+            Amount adjustedPrice = Amount.nothing();
 
             // calculate raw price
-            decimal myPrice = performancePriceDao.fetchPerformancePrice(performance.id);
+            Amount myPrice = new Amount(performancePriceDao.fetchPerformancePrice(performance.id));
 
-            decimal initialPrice = Math.Round(zero, 2, MidpointRounding.ToEven);
-
+            Amount intialprice = Amount.nothing();
             foreach (String foundSeat in foundSeats)
             {
-                decimal categoryRatio = seatsCategory[foundSeat].Equals("STANDARD") ? one : Convert.ToDecimal("1.5");
-                initialPrice = initialPrice + (myPrice*categoryRatio);
+                Rate categoryRatio = seatsCategory[foundSeat].Equals("STANDARD") ? Rate.fully() : new Rate("1.5");
+                intialprice = intialprice.add(myPrice.multiply(categoryRatio));
             }
 
             // check and apply discounts and fidelity program
-            decimal discountTime = VoucherProgramDao.fetchVoucherProgram(performance.startTime);
+            Rate discountTime = new Rate(VoucherProgramDao.fetchVoucherProgram(performance.startTime));
 
             // has he subscribed or not
             CustomerSubscriptionDao customerSubscriptionDao = new CustomerSubscriptionDao();
             bool isSubscribed = customerSubscriptionDao.fetchCustomerSubscription(customerId);
 
-            decimal totalBilling = initialPrice;
+            Amount totalBilling = new Amount(intialprice);
             if (isSubscribed)
             {
                 // apply a 25% discount when the user is subscribed
-                decimal removePercent = Math.Round(Convert.ToDecimal("0.175"),3, MidpointRounding.ToEven);
-                totalBilling = (one -removePercent)* initialPrice;
+                Rate removePercent = new Rate("0.175");
+                totalBilling = totalBilling.multiply(Rate.fully().subtract(removePercent));
             }
-            decimal discountRatio = one - discountTime;
-            String total = Math.Round(totalBilling * discountRatio,2, MidpointRounding.ToEven) + "€";
+            Rate discountRatio = Rate.fully().subtract(discountTime);
+            String total = totalBilling.multiply(discountRatio).asString() + "€";
 
             sb.Append("\t<seatCategory>").Append(reservationCategory).Append("</seatCategory>\n");
             sb.Append("\t<totalAmountDue>").Append(total).Append("</totalAmountDue>\n");
