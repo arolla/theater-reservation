@@ -2,7 +2,6 @@
 
 public class Reservation
 {
-
     private Int64 reservationId;
 
     private Int64 performanceId;
@@ -11,47 +10,46 @@ public class Reservation
 
     private String[] seats;
 
-    public Int64 getReservationId()
+    public Int64 GetReservationId()
     {
         return reservationId;
     }
 
-    public void setReservationId(Int64 reservationId)
+    public void SetReservationId(Int64 reservationId)
     {
         this.reservationId = reservationId;
     }
 
-    public Int64 getPerformanceId()
+    public Int64 GetPerformanceId()
     {
         return performanceId;
     }
 
-    public void setPerformanceId(Int64 performanceId)
+    public void SetPerformanceId(Int64 performanceId)
     {
         this.performanceId = performanceId;
     }
 
-    public String getStatus()
+    public String GetStatus()
     {
         return status;
     }
 
-    public void setStatus(String status)
+    public void SetStatus(String status)
     {
         this.status = status;
     }
 
-    public String[] getSeats()
+    public String[] GetSeats()
     {
         return seats;
     }
 
-    public void setSeats(String[] seats)
+    public void SetSeats(String[] seats)
     {
         this.seats = seats;
     }
-
-        
+    
     public override String ToString()
     {
         return "Reservation{" +

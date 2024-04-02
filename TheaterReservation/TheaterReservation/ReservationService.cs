@@ -9,27 +9,27 @@ public class ReservationService
 {
 
     private static Int64 currentId = 123_455;
-    public static String initNewReservation()
+    public static String InitNewReservation()
     {
         currentId++;
         return currentId.ToString();
     }
 
-    public static void updateReservation(Reservation reservation)
+    public static void UpdateReservation(Reservation reservation)
     {
-        new ReservationDao().update(reservation);
+        new ReservationDao().Update(reservation);
     }
 
-    public static Reservation findReservation(Int64 reservationId)
+    public static Reservation FindReservation(Int64 reservationId)
     {
-        return new ReservationDao().find(reservationId);
+        return new ReservationDao().Find(reservationId);
     }
 
-    public static void cancelReservation(Int64 reservationId)
+    public static void CancelReservation(Int64 reservationId)
     {
-        Reservation reservation = new ReservationDao().find(reservationId);
-        reservation.setStatus("CANCELLED");
-        reservation.setSeats(new String[0]);
-        new ReservationDao().update(reservation);
+        Reservation reservation = new ReservationDao().Find(reservationId);
+        reservation.SetStatus("CANCELLED");
+        reservation.SetSeats(new String[0]);
+        new ReservationDao().Update(reservation);
     }
 }

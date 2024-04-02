@@ -2,7 +2,7 @@
 
 public class VoucherProgramDao
 {
-    public static decimal fetchVoucherProgram(DateTime now)
+    public static decimal FetchVoucherProgram(DateTime now)
     {
         // applies from reservation date, not performance date
         decimal voucher = 0m;

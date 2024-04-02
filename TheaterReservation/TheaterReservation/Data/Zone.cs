@@ -12,22 +12,22 @@ public class Zone
         this.category = category;
     }
 
-    public Row[] getRows()
+    public Row[] GetRows()
     {
         return rows;
     }
 
-    public void setRows(Row[] rows)
+    public void SetRows(Row[] rows)
     {
         this.rows = rows;
     }
 
-    public String getCategory()
+    public String GetCategory()
     {
         return category;
     }
 
-    public void setCategory(String category)
+    public void SetCategory(String category)
     {
         this.category = category;
     }

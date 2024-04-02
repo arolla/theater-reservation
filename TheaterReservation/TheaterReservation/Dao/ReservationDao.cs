@@ -6,16 +6,16 @@ public class ReservationDao
 {
 
     private static Dictionary<Int64, Reservation> reservationMap = new Dictionary<Int64, Reservation>();
-    public void update(Reservation reservation)
+    public void Update(Reservation reservation)
     {
-        if (reservationMap.ContainsKey(reservation.getReservationId()))
+        if (reservationMap.ContainsKey(reservation.GetReservationId()))
         {
-            reservationMap.Remove(reservation.getReservationId());
+            reservationMap.Remove(reservation.GetReservationId());
         }
-        reservationMap.Add(reservation.getReservationId(), reservation);
+        reservationMap.Add(reservation.GetReservationId(), reservation);
     }
 
-    public Reservation find(Int64 reservationId)
+    public Reservation Find(Int64 reservationId)
     {
         return reservationMap[reservationId];
     }

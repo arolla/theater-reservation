@@ -10,17 +10,17 @@ public class TheaterRoomDao
 
     public TheaterRoomDao()
     {
-        theaterRoomMaps.Add(1L, fetchRoomForPerformance1());
-        theaterRoomMaps.Add(2L, fetchRoomForPerformance1());
-        theaterRoomMaps.Add(3L, fetchRoomForPerformance2());
+        theaterRoomMaps.Add(1L, FetchRoomForPerformance1());
+        theaterRoomMaps.Add(2L, FetchRoomForPerformance1());
+        theaterRoomMaps.Add(3L, FetchRoomForPerformance2());
     }
 
-    public TheaterRoom fetchTheaterRoom(Int64 performanceId)
+    public TheaterRoom FetchTheaterRoom(Int64 performanceId)
     {
         return theaterRoomMaps[performanceId];
     }
 
-    public void save(Int64 id, TheaterRoom room)
+    public void Save(Int64 id, TheaterRoom room)
     {
         if (theaterRoomMaps.ContainsKey(id))
         {
@@ -29,21 +29,21 @@ public class TheaterRoomDao
         theaterRoomMaps.Add(id, room);
     }
 
-    public void saveSeats(Int64 id, List<String> seatsID, String status)
+    public void SaveSeats(Int64 id, List<String> seatsID, String status)
     {
         TheaterRoom room = theaterRoomMaps[id];
-        for (int i = 0; i < room.getZones().Length; i++)
+        for (int i = 0; i < room.GetZones().Length; i++)
         {
-            Zone zone = room.getZones()[i];
-            for (int j = 0; j < zone.getRows().Length; j++)
+            Zone zone = room.GetZones()[i];
+            for (int j = 0; j < zone.GetRows().Length; j++)
             {
-                Row row = zone.getRows()[j];
-                for (int k = 0; k < row.getSeats().Length; k++)
+                Row row = zone.GetRows()[j];
+                for (int k = 0; k < row.GetSeats().Length; k++)
                 {
-                    Seat seat = row.getSeats()[k];
-                    if (seatsID.Contains(seat.getSeatId()))
+                    Seat seat = row.GetSeats()[k];
+                    if (seatsID.Contains(seat.GetSeatId()))
                     {
-                        seat.setStatus(status);
+                        seat.SetStatus(status);
                     }
                 }
             }
@@ -51,7 +51,7 @@ public class TheaterRoomDao
     }
 
 
-    private static TheaterRoom fetchRoomForPerformance1()
+    private static TheaterRoom FetchRoomForPerformance1()
     {
         // ici on sent venir l'utilité forte d'un TestDataBuilder, auquel on devrait passer pour chaque zone :
         // - la liste des préfixes de noms de rangées
@@ -170,9 +170,8 @@ public class TheaterRoomDao
             });
     }
 
-    private static TheaterRoom fetchRoomForPerformance2()
+    private static TheaterRoom FetchRoomForPerformance2()
     {
-
         return new TheaterRoom( // pourrait être un Agregate
             new Zone[]{new Zone(new Row[]{
                     new Row(new Seat[]{

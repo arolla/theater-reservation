@@ -12,22 +12,22 @@ public class Seat
         this.status = status;
     }
 
-    public String getSeatId()
+    public String GetSeatId()
     {
         return seatId;
     }
 
-    public void setSeatId(String seatId)
+    public void SetSeatId(String seatId)
     {
         this.seatId = seatId;
     }
 
-    public String getStatus()
+    public String GetStatus()
     {
         return status;
     }
 
-    public void setStatus(String status)
+    public void SetStatus(String status)
     {
         this.status = status;
     }

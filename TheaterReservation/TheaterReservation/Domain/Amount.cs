@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TheaterReservation.Domain
+﻿namespace TheaterReservation.Domain
 {
     public class Amount
     {
@@ -21,27 +15,27 @@ namespace TheaterReservation.Domain
             this.value = ZERO + other.value;
         }
 
-        public Amount multiply(Rate rate)
+        public Amount Apply(Rate rate)
         {
-            return new Amount(this.value * rate.asBigDecimal());
+            return new Amount(this.value * rate.AsBigDecimal());
         }
 
-        public static Amount nothing()
+        public static Amount Nothing()
         {
             return new Amount(ZERO);
         }
 
-        public Amount add(Amount other)
+        public Amount Add(Amount other)
         {
             return new Amount(this.value + other.value);
         }
 
-        public Decimal asBigDecimal()
+        public Decimal AsBigDecimal()
         {
             return value;
         }
 
-        public String asString()
+        public String AsString()
         {
             return value.ToString();
         }

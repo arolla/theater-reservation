@@ -10,12 +10,12 @@ public class TheaterRoom
         this.zones = zones;
     }
 
-    public Zone[] getZones()
+    public Zone[] GetZones()
     {
         return zones;
     }
 
-    public void setZones(Zone[] zones)
+    public void SetZones(Zone[] zones)
     {
         this.zones = zones;
     }

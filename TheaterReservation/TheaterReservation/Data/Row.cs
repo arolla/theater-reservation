@@ -10,12 +10,12 @@ public class Row
         this.seats = seats;
     }
 
-    public Seat[] getSeats()
+    public Seat[] GetSeats()
     {
         return seats;
     }
 
-    public void setSeats(Seat[] seats)
+    public void SetSeats(Seat[] seats)
     {
         this.seats = seats;
     }

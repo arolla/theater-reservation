@@ -14,7 +14,7 @@ namespace TheaterReservation
         bool debug = false;
 
 
-        public String reservation(Int64 customerId, int reservationCount, String reservationCategory, Performance performance)
+        public String Reservation(Int64 customerId, int reservationCount, String reservationCategory, Performance performance)
         {
             Reservation reservation = new Reservation();
             StringBuilder sb = new StringBuilder();
@@ -32,28 +32,28 @@ namespace TheaterReservation
             sb.Append("\t\t<date>").Append(performance.startTime.ToString()).Append("</date>\n");
             sb.Append("\t</performance>\n");
 
-            String res_id = ReservationService.initNewReservation();
-            reservation.setReservationId(Convert.ToInt64(res_id));
-            reservation.setPerformanceId(performance.id);
+            String res_id = ReservationService.InitNewReservation();
+            reservation.SetReservationId(Convert.ToInt64(res_id));
+            reservation.SetPerformanceId(performance.id);
             sb.Append("\t<reservationId>").Append(res_id).Append("</reservationId>\n");
 
-            TheaterRoom room = theaterRoomDao.fetchTheaterRoom(performance.id);
+            TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
 
             // find "reservationCount" first contiguous seats in any row
-            for (int i = 0; i < room.getZones().Length; i++)
+            for (int i = 0; i < room.GetZones().Length; i++)
             {
-                Zone zone = room.getZones()[i];
-                zoneCategory = zone.getCategory();
-                for (int j = 0; j < zone.getRows().Length; j++)
+                Zone zone = room.GetZones()[i];
+                zoneCategory = zone.GetCategory();
+                for (int j = 0; j < zone.GetRows().Length; j++)
                 {
-                    Row row = zone.getRows()[j];
+                    Row row = zone.GetRows()[j];
                     List<String> seatsForRow = new List<string>();
                     int streakOfNotReservedSeats = 0;
-                    for (int k = 0; k < row.getSeats().Length; k++)
+                    for (int k = 0; k < row.GetSeats().Length; k++)
                     {
                         totalSeats++; // devrait être dans une série de boucles différentes mais ça permet qq ns
-                        Seat aSeat = row.getSeats()[k];
-                        if (!aSeat.getStatus().Equals("BOOKED") && !aSeat.getStatus().Equals("BOOKING_PENDING"))
+                        Seat aSeat = row.GetSeats()[k];
+                        if (!aSeat.GetStatus().Equals("BOOKED") && !aSeat.GetStatus().Equals("BOOKING_PENDING"))
                         {
                             remainingSeats++;
                             if (!reservationCategory.Equals(zoneCategory))
@@ -62,7 +62,7 @@ namespace TheaterReservation
                             }
                             if (!foundAllSeats)
                             {
-                                seatsForRow.Add(aSeat.getSeatId());
+                                seatsForRow.Add(aSeat.GetSeatId());
                                 streakOfNotReservedSeats++;
                                 if (streakOfNotReservedSeats >= reservationCount)
                                 {
@@ -84,37 +84,37 @@ namespace TheaterReservation
                     }
                     if (foundAllSeats)
                     {
-                        for (int k = 0; k < row.getSeats().Length; k++)
+                        for (int k = 0; k < row.GetSeats().Length; k++)
                         {
-                            Seat seat = row.getSeats()[k];
+                            Seat seat = row.GetSeats()[k];
                             bookedSeats++;
-                            if (foundSeats.Contains(seat.getSeatId()))
+                            if (foundSeats.Contains(seat.GetSeatId()))
                             {
                                 if (debug)
                                 {
-                                    Console.WriteLine("MIAOU!!! : Seat " + seat.getSeatId() + " will be saved as PENDING");
+                                    Console.WriteLine("MIAOU!!! : Seat " + seat.GetSeatId() + " will be saved as PENDING");
                                 }
                             }
                         }
 
-                        theaterRoomDao.saveSeats(performance.id, foundSeats, "BOOKING_PENDING");
+                        theaterRoomDao.SaveSeats(performance.id, foundSeats, "BOOKING_PENDING");
                     }
                 }
             }
-            reservation.setSeats(foundSeats.ToArray());
+            reservation.SetSeats(foundSeats.ToArray());
 
             Console.WriteLine(remainingSeats);
             Console.WriteLine(totalSeats);
             if (foundAllSeats)
             {
-                reservation.setStatus("PENDING");
+                reservation.SetStatus("PENDING");
             }
             else
             {
-                reservation.setStatus("ABORTED");
+                reservation.SetStatus("ABORTED");
             }
 
-            ReservationService.updateReservation(reservation);
+            ReservationService.UpdateReservation(reservation);
 
             if (performance.performanceNature.Equals("PREMIERE") && remainingSeats < totalSeats * 0.5)
             {
@@ -150,34 +150,34 @@ namespace TheaterReservation
 
             const decimal zero = 0m;
             const decimal one = 1m;
-            Amount adjustedPrice = Amount.nothing();
+            Amount adjustedPrice = Amount.Nothing();
 
             // calculate raw price
-            Amount myPrice = new Amount(performancePriceDao.fetchPerformancePrice(performance.id));
+            Amount myPrice = new Amount(performancePriceDao.FetchPerformancePrice(performance.id));
 
-            Amount intialprice = Amount.nothing();
+            Amount intialprice = Amount.Nothing();
             foreach (String foundSeat in foundSeats)
             {
-                Rate categoryRatio = seatsCategory[foundSeat].Equals("STANDARD") ? Rate.fully() : new Rate("1.5");
-                intialprice = intialprice.add(myPrice.multiply(categoryRatio));
+                Rate categoryRatio = seatsCategory[foundSeat].Equals("STANDARD") ? Rate.Fully() : new Rate("1.5");
+                intialprice = intialprice.Add(myPrice.Apply(categoryRatio));
             }
 
             // check and apply discounts and fidelity program
-            Rate discountTime = new Rate(VoucherProgramDao.fetchVoucherProgram(performance.startTime));
+            Rate discountTime = new Rate(VoucherProgramDao.FetchVoucherProgram(performance.startTime));
 
             // has he subscribed or not
             CustomerSubscriptionDao customerSubscriptionDao = new CustomerSubscriptionDao();
-            bool isSubscribed = customerSubscriptionDao.fetchCustomerSubscription(customerId);
+            bool isSubscribed = customerSubscriptionDao.FetchCustomerSubscription(customerId);
 
             Amount totalBilling = new Amount(intialprice);
             if (isSubscribed)
             {
                 // apply a 25% discount when the user is subscribed
                 Rate removePercent = new Rate("0.175");
-                totalBilling = totalBilling.multiply(Rate.fully().subtract(removePercent));
+                totalBilling = totalBilling.Apply(Rate.Fully().Subtract(removePercent));
             }
-            Rate discountRatio = Rate.fully().subtract(discountTime);
-            String total = totalBilling.multiply(discountRatio).asString() + "€";
+            Rate discountRatio = Rate.Fully().Subtract(discountTime);
+            String total = totalBilling.Apply(discountRatio).AsString() + "€";
 
             sb.Append("\t<seatCategory>").Append(reservationCategory).Append("</seatCategory>\n");
             sb.Append("\t<totalAmountDue>").Append(total).Append("</totalAmountDue>\n");
@@ -185,31 +185,31 @@ namespace TheaterReservation
             return sb.ToString();
         }
 
-        public void cancelReservation(String reservationId, Int64 performanceId, List<String> seats)
+        public void CancelReservation(String reservationId, Int64 performanceId, List<String> seats)
         {
-            TheaterRoom theaterRoom = theaterRoomDao.fetchTheaterRoom(performanceId);
-            for (int i = 0; i < theaterRoom.getZones().Length; i++)
+            TheaterRoom theaterRoom = theaterRoomDao.FetchTheaterRoom(performanceId);
+            for (int i = 0; i < theaterRoom.GetZones().Length; i++)
             {
-                Zone zone = theaterRoom.getZones()[i];
-                for (int j = 0; j < zone.getRows().Length; j++)
+                Zone zone = theaterRoom.GetZones()[i];
+                for (int j = 0; j < zone.GetRows().Length; j++)
                 {
-                    Row row = zone.getRows()[j];
-                    for (int k = 0; k < row.getSeats().Length; k++)
+                    Row row = zone.GetRows()[j];
+                    for (int k = 0; k < row.GetSeats().Length; k++)
                     {
-                        Seat seat = row.getSeats()[k];
-                        if (seats.Contains(seat.getSeatId()))
+                        Seat seat = row.GetSeats()[k];
+                        if (seats.Contains(seat.GetSeatId()))
                         {
-                            seat.setStatus("FREE");
+                            seat.SetStatus("FREE");
                         }
                     }
                 }
             }
-            theaterRoomDao.save(performanceId, theaterRoom);
-            ReservationService.cancelReservation(Convert.ToInt64(reservationId));
+            theaterRoomDao.Save(performanceId, theaterRoom);
+            ReservationService.CancelReservation(Convert.ToInt64(reservationId));
         }
 
 
-        public static void main(String[] args)
+        public static void Main(String[] args)
         {
             Performance performance = new Performance();
             performance.id = 1L;
@@ -217,10 +217,10 @@ namespace TheaterReservation
             performance.startTime = new DateTime(2023, 04, 22, 21, 0, 0);
             performance.performanceNature = "PREMIERE";
             TheaterService theaterService = new TheaterService();
-            Console.WriteLine(theaterService.reservation(1L, 4, "STANDARD",
+            Console.WriteLine(theaterService.Reservation(1L, 4, "STANDARD",
                     performance));
 
-            Console.WriteLine(theaterService.reservation(1L, 5, "STANDARD",
+            Console.WriteLine(theaterService.Reservation(1L, 5, "STANDARD",
                     performance));
 
             Performance performance2 = new Performance();
@@ -228,7 +228,7 @@ namespace TheaterReservation
             performance2.play = "Les fourberies de Scala - Molière";
             performance2.startTime = new DateTime(2023, 03, 21, 21, 0, 0);
             performance2.performanceNature = "PREVIEW";
-            Console.WriteLine(theaterService.reservation(2L, 4, "STANDARD",
+            Console.WriteLine(theaterService.Reservation(2L, 4, "STANDARD",
                     performance2));
         }
     }
