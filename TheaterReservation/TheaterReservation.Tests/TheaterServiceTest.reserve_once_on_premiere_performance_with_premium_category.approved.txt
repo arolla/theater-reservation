@@ -1,0 +1,28 @@
+﻿<reservation>
+	<performance>
+		<play>The CICD by Corneille</play>
+		<date>22/04/2023 21:00:00</date>
+	</performance>
+	<reservationId>123461</reservationId>
+	<reservationStatus>FULFILLABLE</reservationStatus>
+		<seats>
+			<seat>
+				<id>I3</id>
+				<category>PREMIUM</category>
+			</seat>
+			<seat>
+				<id>I4</id>
+				<category>PREMIUM</category>
+			</seat>
+			<seat>
+				<id>I5</id>
+				<category>PREMIUM</category>
+			</seat>
+			<seat>
+				<id>I6</id>
+				<category>PREMIUM</category>
+			</seat>
+		</seats>
+	<seatCategory>PREMIUM</seatCategory>
+	<totalAmountDue>138.60€</totalAmountDue>
+</reservation>
