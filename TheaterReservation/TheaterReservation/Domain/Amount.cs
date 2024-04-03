@@ -10,6 +10,11 @@
             this.value = Math.Round(value, 2, MidpointRounding.ToEven);
         }
 
+        public Amount(string value)
+        {
+            this.value = Math.Round(Convert.ToDecimal(value), 2, MidpointRounding.ToEven);
+        }
+
         public Amount(Amount other)
         {
             this.value = ZERO + other.value;

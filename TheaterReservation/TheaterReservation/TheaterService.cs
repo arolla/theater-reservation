@@ -147,7 +147,7 @@ namespace TheaterReservation
             {
                 sb.Append("\t<reservationStatus>ABORTED</reservationStatus>\n");
             }
-
+            
             const decimal zero = 0m;
             const decimal one = 1m;
             Amount adjustedPrice = Amount.Nothing();
@@ -173,8 +173,8 @@ namespace TheaterReservation
             if (isSubscribed)
             {
                 // apply a 25% discount when the user is subscribed
-                Rate removePercent = new Rate("0.175");
-                totalBilling = totalBilling.Apply(Rate.Fully().Subtract(removePercent));
+                var subtract =  Rate.DiscountPercent("17.5");
+                totalBilling = totalBilling.Apply(subtract);
             }
             Rate discountRatio = Rate.Fully().Subtract(discountTime);
             String total = totalBilling.Apply(discountRatio).AsString() + "€";

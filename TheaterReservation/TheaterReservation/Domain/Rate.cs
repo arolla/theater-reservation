@@ -56,5 +56,18 @@
         {
             return value.GetHashCode();
         }
+
+        public static Rate DiscountPercent(string discountPercent)
+        {
+            return Rate.Fully().Subtract(
+                new Rate(Convert.ToDecimal(discountPercent)/100));
+        }
+
+        public override string ToString()
+        {
+            return "Rate{" +
+                   "value=" + value +
+                   '}';
+        }
     }
 }
