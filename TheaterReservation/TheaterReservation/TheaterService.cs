@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net.Http.Headers;
+using System.Text;
 using TheaterReservation.Dao;
 using TheaterReservation.Data;
 using TheaterReservation.Domain;
@@ -25,7 +26,7 @@ namespace TheaterReservation
             reservation.SetPerformanceId(performance.id);
            
             TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
-
+            List<ReservationSeat> reservedSeats = new List<ReservationSeat>();
             // find "reservationCount" first contiguous seats in any row
             for (int i = 0; i < room.GetZones().Length; i++)
             {
@@ -57,6 +58,7 @@ namespace TheaterReservation
                                     {
                                         foundSeats.Add(seat);
                                         seatsCategory.Add(seat, zoneCategory);
+                                        reservedSeats.Add(new ReservationSeat(seat, zoneCategory));
                                     }
                                     foundAllSeats = true;
                                     remainingSeats -= streakOfNotReservedSeats;
@@ -91,19 +93,21 @@ namespace TheaterReservation
             if (performance.performanceNature.Equals("PREMIERE") && remainingSeats < totalSeats * 0.5)
             {
                 foundSeats = new List<string>();
+                reservedSeats = new List<ReservationSeat>();
             }
             else if (performance.performanceNature.Equals("PREVIEW") && remainingSeats < totalSeats * 0.9)
             {
                 foundSeats = new List<string>();
+                reservedSeats = new List<ReservationSeat>();
             }
             
             // calculate raw price
             Amount myPrice = new Amount(performancePriceDao.FetchPerformancePrice(performance.id));
 
             Amount intialPrice = Amount.Nothing();
-            foreach (var foundSeat in foundSeats)
+            foreach (var reservedSeat in reservedSeats)
             {
-                Rate categoryRatio = seatsCategory[foundSeat].Equals("STANDARD") ? Rate.Fully() : new Rate("1.5");
+                Rate categoryRatio = reservedSeat.Category.Equals("STANDARD") ? Rate.Fully() : new Rate("1.5");
                 intialPrice = intialPrice.Add(myPrice.Apply(categoryRatio));
             }
 
@@ -122,7 +126,7 @@ namespace TheaterReservation
             Rate discountRatio = Rate.Fully().Subtract(discountTime);
             String total = totalBilling.Apply(discountRatio).AsString() + "€";
 
-            return ToXml(new ReservationRequest(reservationCategory, performance, res_id, foundSeats, seatsCategory, total));
+            return ToXml(new ReservationRequest(reservationCategory, performance, res_id, reservedSeats, total));
         }
 
         private static string ToXml(ReservationRequest reservationRequest)
@@ -138,11 +142,11 @@ namespace TheaterReservation
             {
                 sb.Append("\t<reservationStatus>FULFILLABLE</reservationStatus>\n");
                 sb.Append("\t\t<seats>\n");
-                foreach (String seatReference in reservationRequest.FoundSeats)
+                foreach (var reservedSeat in reservationRequest.ReservedSeats)
                 {
                     sb.Append("\t\t\t<seat>\n");
-                    sb.Append("\t\t\t\t<id>").Append(seatReference).Append("</id>\n");
-                    sb.Append("\t\t\t\t<category>").Append(reservationRequest.GetSeatCategory(seatReference)).Append("</category>\n");
+                    sb.Append("\t\t\t\t<id>").Append(reservedSeat.Seat).Append("</id>\n");
+                    sb.Append("\t\t\t\t<category>").Append(reservedSeat.Category).Append("</category>\n");
                     sb.Append("\t\t\t</seat>\n");
                 }
 

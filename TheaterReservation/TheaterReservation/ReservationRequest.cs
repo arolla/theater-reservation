@@ -6,21 +6,19 @@ namespace TheaterReservation;
 
 public class ReservationRequest
 {
-    public ReservationRequest(string reservationCategory, Performance performance, string reservationId, List<string> foundSeats, Dictionary<string, string> seatsCategory, string totalBilling)
+    public ReservationRequest(string reservationCategory, Performance performance, string reservationId, List<ReservationSeat> reservedSeats, string totalBilling)
     {
         ReservationCategory = reservationCategory;
         Performance = performance;
         ReservationId = reservationId;
-        FoundSeats = foundSeats;
-        SeatsCategory = seatsCategory;
+        ReservedSeats = reservedSeats;
         TotalBilling = totalBilling;
     }
 
     public string ReservationCategory { get; }
     public Performance Performance { get; }
     public string ReservationId { get; }
-    public List<string> FoundSeats { get; }
-    public Dictionary<string, string> SeatsCategory { get; }
+    public List<ReservationSeat> ReservedSeats { get; }
     public string TotalBilling { get; }
 
     public string GetPerformanceTitle()
@@ -35,11 +33,6 @@ public class ReservationRequest
 
     public bool IsFulfillable()
     {
-        return FoundSeats.Count != 0;
-    }
-
-    public string GetSeatCategory(string seatReference)
-    {
-        return SeatsCategory[seatReference];
+        return ReservedSeats.Count != 0;
     }
 }
