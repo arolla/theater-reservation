@@ -5,7 +5,6 @@ using TheaterReservation.Domain;
 
 namespace TheaterReservation
 {
-
     public class TheaterService
     {
         private readonly TheaterRoomDao theaterRoomDao = new TheaterRoomDao();
@@ -21,8 +20,7 @@ namespace TheaterReservation
             int remainingSeats = 0;
             int totalSeats = 0;
             bool foundAllSeats = false;
-
-           
+            
             String res_id = ReservationService.InitNewReservation();
             reservation.SetReservationId(Convert.ToInt64(res_id));
             reservation.SetPerformanceId(performance.id);
@@ -125,33 +123,40 @@ namespace TheaterReservation
             Rate discountRatio = Rate.Fully().Subtract(discountTime);
             String total = totalBilling.Apply(discountRatio).AsString() + "€";
 
-            sb.Append("<reservation>\n");
-            sb.Append("\t<performance>\n");
-            sb.Append("\t\t<play>").Append(performance.play).Append("</play>\n");
-            sb.Append("\t\t<date>").Append(performance.startTime.ToString()).Append("</date>\n");
-            sb.Append("\t</performance>\n");
-            sb.Append("\t<reservationId>").Append(res_id).Append("</reservationId>\n");
-            if (foundSeats.Count != 0)
+            return ToXml(new ReservationRequest(reservationCategory, performance, sb, res_id, foundSeats, seatsCategory, total));
+        }
+
+        private static string ToXml(ReservationRequest reservationRequest)
+        {
+            reservationRequest.Sb.Append("<reservation>\n");
+            reservationRequest.Sb.Append("\t<performance>\n");
+            reservationRequest.Sb.Append("\t\t<play>").Append(reservationRequest.Performance.play).Append("</play>\n");
+            reservationRequest.Sb.Append("\t\t<date>").Append(reservationRequest.Performance.startTime.ToString()).Append("</date>\n");
+            reservationRequest.Sb.Append("\t</performance>\n");
+            reservationRequest.Sb.Append("\t<reservationId>").Append(reservationRequest.ResId).Append("</reservationId>\n");
+            if (reservationRequest.FoundSeats.Count != 0)
             {
-                sb.Append("\t<reservationStatus>FULFILLABLE</reservationStatus>\n");
-                sb.Append("\t\t<seats>\n");
-                foreach (String s in foundSeats)
+                reservationRequest.Sb.Append("\t<reservationStatus>FULFILLABLE</reservationStatus>\n");
+                reservationRequest.Sb.Append("\t\t<seats>\n");
+                foreach (String s in reservationRequest.FoundSeats)
                 {
-                    sb.Append("\t\t\t<seat>\n");
-                    sb.Append("\t\t\t\t<id>").Append(s).Append("</id>\n");
-                    sb.Append("\t\t\t\t<category>").Append(seatsCategory[s]).Append("</category>\n");
-                    sb.Append("\t\t\t</seat>\n");
+                    reservationRequest.Sb.Append("\t\t\t<seat>\n");
+                    reservationRequest.Sb.Append("\t\t\t\t<id>").Append(s).Append("</id>\n");
+                    reservationRequest.Sb.Append("\t\t\t\t<category>").Append(reservationRequest.SeatsCategory[s]).Append("</category>\n");
+                    reservationRequest.Sb.Append("\t\t\t</seat>\n");
                 }
-                sb.Append("\t\t</seats>\n");
+
+                reservationRequest.Sb.Append("\t\t</seats>\n");
             }
             else
             {
-                sb.Append("\t<reservationStatus>ABORTED</reservationStatus>\n");
+                reservationRequest.Sb.Append("\t<reservationStatus>ABORTED</reservationStatus>\n");
             }
-            sb.Append("\t<seatCategory>").Append(reservationCategory).Append("</seatCategory>\n");
-            sb.Append("\t<totalAmountDue>").Append(total).Append("</totalAmountDue>\n");
-            sb.Append("</reservation>\n");
-            return sb.ToString();
+
+            reservationRequest.Sb.Append("\t<seatCategory>").Append(reservationRequest.ReservationCategory).Append("</seatCategory>\n");
+            reservationRequest.Sb.Append("\t<totalAmountDue>").Append(reservationRequest.Total).Append("</totalAmountDue>\n");
+            reservationRequest.Sb.Append("</reservation>\n");
+            return reservationRequest.Sb.ToString();
         }
 
         public void CancelReservation(String reservationId, Int64 performanceId, List<String> seats)
