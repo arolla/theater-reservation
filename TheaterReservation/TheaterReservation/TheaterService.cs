@@ -10,15 +10,11 @@ namespace TheaterReservation
     {
         private readonly TheaterRoomDao theaterRoomDao = new TheaterRoomDao();
         private readonly PerformancePriceDao performancePriceDao = new PerformancePriceDao();
-
-        bool debug = false;
-
-
+        
         public String Reservation(Int64 customerId, int reservationCount, String reservationCategory, Performance performance)
         {
             Reservation reservation = new Reservation();
             StringBuilder sb = new StringBuilder();
-            int bookedSeats = 0;
             List<String> foundSeats = new List<string>();
             Dictionary<String, String> seatsCategory = new Dictionary<string, string>();
             String zoneCategory;
@@ -84,27 +80,12 @@ namespace TheaterReservation
                     }
                     if (foundAllSeats)
                     {
-                        for (int k = 0; k < row.GetSeats().Length; k++)
-                        {
-                            Seat seat = row.GetSeats()[k];
-                            bookedSeats++;
-                            if (foundSeats.Contains(seat.GetSeatId()))
-                            {
-                                if (debug)
-                                {
-                                    Console.WriteLine("MIAOU!!! : Seat " + seat.GetSeatId() + " will be saved as PENDING");
-                                }
-                            }
-                        }
-
                         theaterRoomDao.SaveSeats(performance.id, foundSeats, "BOOKING_PENDING");
                     }
                 }
             }
             reservation.SetSeats(foundSeats.ToArray());
-
-            Console.WriteLine(remainingSeats);
-            Console.WriteLine(totalSeats);
+            
             if (foundAllSeats)
             {
                 reservation.SetStatus("PENDING");
@@ -118,15 +99,11 @@ namespace TheaterReservation
 
             if (performance.performanceNature.Equals("PREMIERE") && remainingSeats < totalSeats * 0.5)
             {
-                // keep 50% seats for VIP
                 foundSeats = new List<string>();
-                Console.WriteLine("Not enough VIP seats available for Premiere");
             }
             else if (performance.performanceNature.Equals("PREVIEW") && remainingSeats < totalSeats * 0.9)
             {
-                // keep 10% seats for VIP
                 foundSeats = new List<string>();
-                Console.WriteLine("Not enough VIP seats available for Preview");
             }
 
 
@@ -147,32 +124,26 @@ namespace TheaterReservation
             {
                 sb.Append("\t<reservationStatus>ABORTED</reservationStatus>\n");
             }
-            
-            const decimal zero = 0m;
-            const decimal one = 1m;
-            Amount adjustedPrice = Amount.Nothing();
 
             // calculate raw price
             Amount myPrice = new Amount(performancePriceDao.FetchPerformancePrice(performance.id));
 
-            Amount intialprice = Amount.Nothing();
-            foreach (String foundSeat in foundSeats)
+            Amount intialPrice = Amount.Nothing();
+            foreach (var foundSeat in foundSeats)
             {
                 Rate categoryRatio = seatsCategory[foundSeat].Equals("STANDARD") ? Rate.Fully() : new Rate("1.5");
-                intialprice = intialprice.Add(myPrice.Apply(categoryRatio));
+                intialPrice = intialPrice.Add(myPrice.Apply(categoryRatio));
             }
 
             // check and apply discounts and fidelity program
             Rate discountTime = new Rate(VoucherProgramDao.FetchVoucherProgram(performance.startTime));
-
-            // has he subscribed or not
+            
             CustomerSubscriptionDao customerSubscriptionDao = new CustomerSubscriptionDao();
             bool isSubscribed = customerSubscriptionDao.FetchCustomerSubscription(customerId);
 
-            Amount totalBilling = new Amount(intialprice);
+            Amount totalBilling = new Amount(intialPrice);
             if (isSubscribed)
             {
-                // apply a 25% discount when the user is subscribed
                 var subtract =  Rate.DiscountPercent("17.5");
                 totalBilling = totalBilling.Apply(subtract);
             }

@@ -1,11 +1,13 @@
-﻿namespace TheaterReservation.Domain
+﻿using System.Globalization;
+
+namespace TheaterReservation.Domain
 {
     public class Amount
     {
-        private const Decimal ZERO = 0.0M;
-        private readonly Decimal value;
+        private const decimal ZERO = 0.0M;
+        private readonly decimal value;
 
-        public Amount(Decimal value)
+        public Amount(decimal value)
         {
             this.value = Math.Round(value, 2, MidpointRounding.ToEven);
         }
@@ -35,14 +37,14 @@
             return new Amount(this.value + other.value);
         }
 
-        public Decimal AsBigDecimal()
+        public decimal AsBigDecimal()
         {
             return value;
         }
 
-        public String AsString()
+        public string AsString()
         {
-            return value.ToString();
+            return value.ToString(CultureInfo.InvariantCulture);
         }
 
         public override bool Equals(object? obj)
