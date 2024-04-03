@@ -1,26 +1,45 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using TheaterReservation.Data;
 
 namespace TheaterReservation;
 
 public class ReservationRequest
 {
-    public ReservationRequest(string reservationCategory, Performance performance, StringBuilder sb, string res_id, List<string> foundSeats, Dictionary<string, string> seatsCategory, string total)
+    public ReservationRequest(string reservationCategory, Performance performance, string reservationId, List<string> foundSeats, Dictionary<string, string> seatsCategory, string totalBilling)
     {
         ReservationCategory = reservationCategory;
         Performance = performance;
-        Sb = sb;
-        ResId = res_id;
+        ReservationId = reservationId;
         FoundSeats = foundSeats;
         SeatsCategory = seatsCategory;
-        Total = total;
+        TotalBilling = totalBilling;
     }
 
     public string ReservationCategory { get; }
     public Performance Performance { get; }
-    public StringBuilder Sb { get; }
-    public string ResId { get; }
+    public string ReservationId { get; }
     public List<string> FoundSeats { get; }
     public Dictionary<string, string> SeatsCategory { get; }
-    public string Total { get; }
+    public string TotalBilling { get; }
+
+    public string GetPerformanceTitle()
+    {
+        return Performance.play;
+    }
+
+    public string GetStartDate()
+    {
+        return Performance.startTime.ToString();
+    }
+
+    public bool IsFulfillable()
+    {
+        return FoundSeats.Count != 0;
+    }
+
+    public string GetSeatCategory(string seatReference)
+    {
+        return SeatsCategory[seatReference];
+    }
 }

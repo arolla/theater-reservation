@@ -13,7 +13,6 @@ namespace TheaterReservation
         public String Reservation(Int64 customerId, int reservationCount, String reservationCategory, Performance performance)
         {
             Reservation reservation = new Reservation();
-            StringBuilder sb = new StringBuilder();
             List<String> foundSeats = new List<string>();
             Dictionary<String, String> seatsCategory = new Dictionary<string, string>();
             String zoneCategory;
@@ -123,40 +122,41 @@ namespace TheaterReservation
             Rate discountRatio = Rate.Fully().Subtract(discountTime);
             String total = totalBilling.Apply(discountRatio).AsString() + "€";
 
-            return ToXml(new ReservationRequest(reservationCategory, performance, sb, res_id, foundSeats, seatsCategory, total));
+            return ToXml(new ReservationRequest(reservationCategory, performance, res_id, foundSeats, seatsCategory, total));
         }
 
         private static string ToXml(ReservationRequest reservationRequest)
         {
-            reservationRequest.Sb.Append("<reservation>\n");
-            reservationRequest.Sb.Append("\t<performance>\n");
-            reservationRequest.Sb.Append("\t\t<play>").Append(reservationRequest.Performance.play).Append("</play>\n");
-            reservationRequest.Sb.Append("\t\t<date>").Append(reservationRequest.Performance.startTime.ToString()).Append("</date>\n");
-            reservationRequest.Sb.Append("\t</performance>\n");
-            reservationRequest.Sb.Append("\t<reservationId>").Append(reservationRequest.ResId).Append("</reservationId>\n");
-            if (reservationRequest.FoundSeats.Count != 0)
+            StringBuilder sb = new StringBuilder();
+            sb.Append("<reservation>\n");
+            sb.Append("\t<performance>\n");
+            sb.Append("\t\t<play>").Append(reservationRequest.GetPerformanceTitle()).Append("</play>\n");
+            sb.Append("\t\t<date>").Append(reservationRequest.GetStartDate()).Append("</date>\n");
+            sb.Append("\t</performance>\n");
+            sb.Append("\t<reservationId>").Append(reservationRequest.ReservationId).Append("</reservationId>\n");
+            if (reservationRequest.IsFulfillable())
             {
-                reservationRequest.Sb.Append("\t<reservationStatus>FULFILLABLE</reservationStatus>\n");
-                reservationRequest.Sb.Append("\t\t<seats>\n");
-                foreach (String s in reservationRequest.FoundSeats)
+                sb.Append("\t<reservationStatus>FULFILLABLE</reservationStatus>\n");
+                sb.Append("\t\t<seats>\n");
+                foreach (String seatReference in reservationRequest.FoundSeats)
                 {
-                    reservationRequest.Sb.Append("\t\t\t<seat>\n");
-                    reservationRequest.Sb.Append("\t\t\t\t<id>").Append(s).Append("</id>\n");
-                    reservationRequest.Sb.Append("\t\t\t\t<category>").Append(reservationRequest.SeatsCategory[s]).Append("</category>\n");
-                    reservationRequest.Sb.Append("\t\t\t</seat>\n");
+                    sb.Append("\t\t\t<seat>\n");
+                    sb.Append("\t\t\t\t<id>").Append(seatReference).Append("</id>\n");
+                    sb.Append("\t\t\t\t<category>").Append(reservationRequest.GetSeatCategory(seatReference)).Append("</category>\n");
+                    sb.Append("\t\t\t</seat>\n");
                 }
 
-                reservationRequest.Sb.Append("\t\t</seats>\n");
+                sb.Append("\t\t</seats>\n");
             }
             else
             {
-                reservationRequest.Sb.Append("\t<reservationStatus>ABORTED</reservationStatus>\n");
+                sb.Append("\t<reservationStatus>ABORTED</reservationStatus>\n");
             }
 
-            reservationRequest.Sb.Append("\t<seatCategory>").Append(reservationRequest.ReservationCategory).Append("</seatCategory>\n");
-            reservationRequest.Sb.Append("\t<totalAmountDue>").Append(reservationRequest.Total).Append("</totalAmountDue>\n");
-            reservationRequest.Sb.Append("</reservation>\n");
-            return reservationRequest.Sb.ToString();
+            sb.Append("\t<seatCategory>").Append(reservationRequest.ReservationCategory).Append("</seatCategory>\n");
+            sb.Append("\t<totalAmountDue>").Append(reservationRequest.TotalBilling).Append("</totalAmountDue>\n");
+            sb.Append("</reservation>\n");
+            return sb.ToString();
         }
 
         public void CancelReservation(String reservationId, Int64 performanceId, List<String> seats)
