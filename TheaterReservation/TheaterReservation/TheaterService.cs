@@ -22,17 +22,11 @@ namespace TheaterReservation
             int totalSeats = 0;
             bool foundAllSeats = false;
 
-            sb.Append("<reservation>\n");
-            sb.Append("\t<performance>\n");
-            sb.Append("\t\t<play>").Append(performance.play).Append("</play>\n");
-            sb.Append("\t\t<date>").Append(performance.startTime.ToString()).Append("</date>\n");
-            sb.Append("\t</performance>\n");
-
+           
             String res_id = ReservationService.InitNewReservation();
             reservation.SetReservationId(Convert.ToInt64(res_id));
             reservation.SetPerformanceId(performance.id);
-            sb.Append("\t<reservationId>").Append(res_id).Append("</reservationId>\n");
-
+           
             TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
 
             // find "reservationCount" first contiguous seats in any row
@@ -105,26 +99,7 @@ namespace TheaterReservation
             {
                 foundSeats = new List<string>();
             }
-
-
-            if (foundSeats.Count != 0)
-            {
-                sb.Append("\t<reservationStatus>FULFILLABLE</reservationStatus>\n");
-                sb.Append("\t\t<seats>\n");
-                foreach (String s in foundSeats)
-                {
-                    sb.Append("\t\t\t<seat>\n");
-                    sb.Append("\t\t\t\t<id>").Append(s).Append("</id>\n");
-                    sb.Append("\t\t\t\t<category>").Append(seatsCategory[s]).Append("</category>\n");
-                    sb.Append("\t\t\t</seat>\n");
-                }
-                sb.Append("\t\t</seats>\n");
-            }
-            else
-            {
-                sb.Append("\t<reservationStatus>ABORTED</reservationStatus>\n");
-            }
-
+            
             // calculate raw price
             Amount myPrice = new Amount(performancePriceDao.FetchPerformancePrice(performance.id));
 
@@ -150,6 +125,29 @@ namespace TheaterReservation
             Rate discountRatio = Rate.Fully().Subtract(discountTime);
             String total = totalBilling.Apply(discountRatio).AsString() + "€";
 
+            sb.Append("<reservation>\n");
+            sb.Append("\t<performance>\n");
+            sb.Append("\t\t<play>").Append(performance.play).Append("</play>\n");
+            sb.Append("\t\t<date>").Append(performance.startTime.ToString()).Append("</date>\n");
+            sb.Append("\t</performance>\n");
+            sb.Append("\t<reservationId>").Append(res_id).Append("</reservationId>\n");
+            if (foundSeats.Count != 0)
+            {
+                sb.Append("\t<reservationStatus>FULFILLABLE</reservationStatus>\n");
+                sb.Append("\t\t<seats>\n");
+                foreach (String s in foundSeats)
+                {
+                    sb.Append("\t\t\t<seat>\n");
+                    sb.Append("\t\t\t\t<id>").Append(s).Append("</id>\n");
+                    sb.Append("\t\t\t\t<category>").Append(seatsCategory[s]).Append("</category>\n");
+                    sb.Append("\t\t\t</seat>\n");
+                }
+                sb.Append("\t\t</seats>\n");
+            }
+            else
+            {
+                sb.Append("\t<reservationStatus>ABORTED</reservationStatus>\n");
+            }
             sb.Append("\t<seatCategory>").Append(reservationCategory).Append("</seatCategory>\n");
             sb.Append("\t<totalAmountDue>").Append(total).Append("</totalAmountDue>\n");
             sb.Append("</reservation>\n");
