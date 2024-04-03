@@ -10,21 +10,19 @@ namespace TheaterReservation
     {
         private readonly TheaterRoomDao theaterRoomDao = new TheaterRoomDao();
         private readonly PerformancePriceDao performancePriceDao = new PerformancePriceDao();
-        
+
         public String Reservation(Int64 customerId, int reservationCount, String reservationCategory, Performance performance)
         {
             Reservation reservation = new Reservation();
-            List<String> foundSeats = new List<string>();
-            Dictionary<String, String> seatsCategory = new Dictionary<string, string>();
             String zoneCategory;
             int remainingSeats = 0;
             int totalSeats = 0;
             bool foundAllSeats = false;
-            
+
             String res_id = ReservationService.InitNewReservation();
             reservation.SetReservationId(Convert.ToInt64(res_id));
             reservation.SetPerformanceId(performance.id);
-           
+
             TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
             List<ReservationSeat> reservedSeats = new List<ReservationSeat>();
             // find "reservationCount" first contiguous seats in any row
@@ -56,8 +54,6 @@ namespace TheaterReservation
                                 {
                                     foreach (String seat in seatsForRow)
                                     {
-                                        foundSeats.Add(seat);
-                                        seatsCategory.Add(seat, zoneCategory);
                                         reservedSeats.Add(new ReservationSeat(seat, zoneCategory));
                                     }
                                     foundAllSeats = true;
@@ -73,13 +69,15 @@ namespace TheaterReservation
                     }
                     if (foundAllSeats)
                     {
-                        theaterRoomDao.SaveSeats(performance.id, foundSeats, "BOOKING_PENDING");
+                        theaterRoomDao.SaveSeats(performance.id,
+                            reservedSeats.Select(r => r.Seat).ToList()
+                                    , "BOOKING_PENDING");
                     }
                 }
             }
-            reservation.SetSeats(foundSeats.ToArray());
-            
-            if (foundAllSeats)
+            reservation.SetSeats(reservedSeats.Select(r => r.Seat).ToArray());
+
+            if (reservedSeats.Count != 0)
             {
                 reservation.SetStatus("PENDING");
             }
@@ -92,15 +90,13 @@ namespace TheaterReservation
 
             if (performance.performanceNature.Equals("PREMIERE") && remainingSeats < totalSeats * 0.5)
             {
-                foundSeats = new List<string>();
                 reservedSeats = new List<ReservationSeat>();
             }
             else if (performance.performanceNature.Equals("PREVIEW") && remainingSeats < totalSeats * 0.9)
             {
-                foundSeats = new List<string>();
                 reservedSeats = new List<ReservationSeat>();
             }
-            
+
             // calculate raw price
             Amount myPrice = new Amount(performancePriceDao.FetchPerformancePrice(performance.id));
 
@@ -113,14 +109,14 @@ namespace TheaterReservation
 
             // check and apply discounts and fidelity program
             Rate discountTime = new Rate(VoucherProgramDao.FetchVoucherProgram(performance.startTime));
-            
+
             CustomerSubscriptionDao customerSubscriptionDao = new CustomerSubscriptionDao();
             bool isSubscribed = customerSubscriptionDao.FetchCustomerSubscription(customerId);
 
             Amount totalBilling = new Amount(intialPrice);
             if (isSubscribed)
             {
-                var subtract =  Rate.DiscountPercent("17.5");
+                var subtract = Rate.DiscountPercent("17.5");
                 totalBilling = totalBilling.Apply(subtract);
             }
             Rate discountRatio = Rate.Fully().Subtract(discountTime);
