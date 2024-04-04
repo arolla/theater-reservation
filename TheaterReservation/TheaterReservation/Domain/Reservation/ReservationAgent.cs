@@ -81,15 +81,10 @@ public class ReservationAgent
         AllocationQuotaSpecification allocationQuota)
     {
         TheaterTopology theaterTopology = TheaterTopology.From(room);
-        PerformanceAllocation performanceAllocation = new PerformanceAllocation(theaterTopology, room.GetFreeSeats());
+        PerformanceAllocation performanceAllocation = new PerformanceAllocation(theaterTopology, room.GetFreeSeats(), reservationCount, reservationCategory);
 
-        List<ReservationSeat> reservedSeats =
-            performanceAllocation.FindSeatsForReservation(reservationCount, reservationCategory);
-
-        PerformanceInventory performanceInventory = new PerformanceInventory(
-            performanceAllocation.GetFreeSeatCount() - reservedSeats.Count(),
-            performanceAllocation.GetTotalSeatCount());
-        if (allocationQuota.IsSatisfiedBy(performanceInventory))
+        List<ReservationSeat> reservedSeats = performanceAllocation.FindSeatsForReservation();
+        if (allocationQuota.IsSatisfiedBy(performanceAllocation.GetPerformanceInventory()))
         {
             reservedSeats = new List<ReservationSeat>();
         }

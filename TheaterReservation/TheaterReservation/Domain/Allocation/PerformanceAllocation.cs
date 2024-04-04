@@ -8,12 +8,16 @@ namespace TheaterReservation.Domain.Allocation
         private readonly TheaterTopology theaterTopology;
 
         private readonly List<String> freeSeats;
+        private readonly int requestedSeatCount;
+        private readonly string reservationCategory;
 
 
-        public PerformanceAllocation(TheaterTopology theaterTopology, List<String> freeSeats)
+        public PerformanceAllocation(TheaterTopology theaterTopology, List<String> freeSeats, int requestedSeatCount, String reservationCategory)
         {
             this.theaterTopology = theaterTopology;
             this.freeSeats = freeSeats;
+            this.requestedSeatCount = requestedSeatCount;
+            this.reservationCategory = reservationCategory;
         }
 
 
@@ -27,20 +31,24 @@ namespace TheaterReservation.Domain.Allocation
             return freeSeats.Count;
         }
 
-        public List<ReservationSeat> FindSeatsForReservation(int reservationCount, String reservationCategory)
+        public List<ReservationSeat> FindSeatsForReservation()
         {
             var reservationSeats = theaterTopology.Rows
-                .Select(row => row.FindSeatsForReservation(reservationCount, reservationCategory, freeSeats))
+                .Select(row => row.FindSeatsForReservation(requestedSeatCount, reservationCategory, freeSeats))
                 .FirstOrDefault(seatTopologies => seatTopologies.Count != 0);
-            
+
             reservationSeats ??= new List<SeatTopology>();
-            
+
             var result = reservationSeats
                 .Select(seatTopology =>
                     new ReservationSeat(seatTopology.SeatReference, seatTopology.category))
                 .ToList();
 
             return result;
+        }
+        public PerformanceInventory GetPerformanceInventory()
+        {
+            return new PerformanceInventory(GetFreeSeatCount() - requestedSeatCount, GetTotalSeatCount());
         }
     }
 }
