@@ -7,15 +7,15 @@ namespace TheaterReservation.Exposition
 {
     public class TicketPrinter
     {
-        private readonly TheaterService theaterService;
+        private readonly ReservationAgent _reservationAgent;
 
-        public TicketPrinter(TheaterService theaterService)
+        public TicketPrinter(ReservationAgent reservationAgent)
         {
-            this.theaterService = theaterService;
+            this._reservationAgent = reservationAgent;
         }
         public String Reservation(Int64 customerId, int reservationCount, String reservationCategory, Performance performance)
         {
-            var reservationRequest = this.theaterService.Reserve(customerId, reservationCount, reservationCategory, performance);
+            var reservationRequest = this._reservationAgent.Reserve(customerId, reservationCount, reservationCategory, performance);
             return ToXml(reservationRequest);
         }
         private static string ToXml(ReservationRequest reservationRequest)

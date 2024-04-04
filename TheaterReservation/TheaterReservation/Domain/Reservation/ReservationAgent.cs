@@ -2,19 +2,18 @@
 using TheaterReservation.Data;
 using TheaterReservation.Domain;
 using TheaterReservation.Domain.Allocation;
-using TheaterReservation.Domain.Reservation;
 using TheaterReservation.Exposition;
 using TheaterReservation.Infra;
 
-namespace TheaterReservation;
+namespace TheaterReservation.Domain.Reservation;
 
-public class TheaterService
+public class ReservationAgent
 {
     private readonly TheaterRoomDao theaterRoomDao = new TheaterRoomDao();
     private readonly PerformancePriceDao performancePriceDao = new PerformancePriceDao();
     private readonly IAllocationQuotas allocationQuotas;
 
-    public TheaterService(IAllocationQuotas quotas)
+    public ReservationAgent(IAllocationQuotas quotas)
     {
         allocationQuotas = quotas;
     }
@@ -27,27 +26,37 @@ public class TheaterService
         var voucherProgramDiscount = VoucherProgramDao.FetchVoucherProgram(performance.startTime);
         var performancePrice = performancePriceDao.FetchPerformancePrice(performance.id);
         TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
-        String res_id = ReservationService.InitNewReservation();
+        string reservationId = ReservationService.InitNewReservation();
         var performanceNature = new PerformanceNature(performance.performanceNature);
         var allocationQuotaSpecification = allocationQuotas.Find(performanceNature);
 
         Reservation reservation = new Reservation();
-        reservation.SetReservationId(Convert.ToInt64(res_id));
+        reservation.SetReservationId(Convert.ToInt64(reservationId));
         reservation.SetPerformanceId(performance.id);
-        String zoneCategory;
         int remainingSeats = 0;
         int totalSeats = 0;
         bool foundAllSeats = false;
         List<ReservationSeat> reservedSeats = new List<ReservationSeat>();
+
+        return AllocateSeats(reservationCount, reservationCategory, performance, room,
+            totalSeats, remainingSeats, foundAllSeats, reservedSeats, allocationQuotaSpecification,
+            reservation, performancePrice, voucherProgramDiscount, isSubscribed, reservationId);
+    }
+
+    private ReservationRequest AllocateSeats(int reservationCount, string reservationCategory, Performance performance,
+        TheaterRoom room, int totalSeats, int remainingSeats, bool foundAllSeats, List<ReservationSeat> reservedSeats,
+        AllocationQuotaSpecification allocationQuotaSpecification, Reservation reservation, decimal performancePrice,
+        decimal voucherProgramDiscount, bool isSubscribed, string reservationId)
+    {
         // find "reservationCount" first contiguous seats in any row
         for (int i = 0; i < room.GetZones().Length; i++)
         {
             Zone zone = room.GetZones()[i];
-            zoneCategory = zone.GetCategory();
+            var zoneCategory = zone.GetCategory();
             for (int j = 0; j < zone.GetRows().Length; j++)
             {
                 Row row = zone.GetRows()[j];
-                List<String> seatsForRow = new List<string>();
+                List<string> seatsForRow = new List<string>();
                 int streakOfNotReservedSeats = 0;
                 for (int k = 0; k < row.GetSeats().Length; k++)
                 {
@@ -67,7 +76,7 @@ public class TheaterService
                             streakOfNotReservedSeats++;
                             if (streakOfNotReservedSeats >= reservationCount)
                             {
-                                foreach (String seat in seatsForRow)
+                                foreach (string seat in seatsForRow)
                                 {
                                     reservedSeats.Add(new ReservationSeat(seat, zoneCategory));
                                 }
@@ -116,7 +125,7 @@ public class TheaterService
         }
 
         Rate discountRatio = Rate.Fully().Subtract(discountTime);
-        String total = totalBilling.Apply(discountRatio).AsString() + "€";
+        string total = totalBilling.Apply(discountRatio).AsString() + "€";
 
         if (foundAllSeats)
         {
@@ -124,14 +133,15 @@ public class TheaterService
                 reservedSeats.Select(r => r.Seat).ToList()
                 , "BOOKING_PENDING");
         }
+
         ReservationService.UpdateReservation(reservation);
 
         TheaterSession theaterSession = new TheaterSession(performance.play, performance.startTime);
-        var reservationRequest = new ReservationRequest(reservationCategory, res_id, reservedSeats, total, theaterSession);
+        var reservationRequest = new ReservationRequest(reservationCategory, reservationId, reservedSeats, total, theaterSession);
         return reservationRequest;
     }
 
-    public void CancelReservation(String reservationId, Int64 performanceId, List<String> seats)
+    public void CancelReservation(string reservationId, long performanceId, List<string> seats)
     {
         TheaterRoom theaterRoom = theaterRoomDao.FetchTheaterRoom(performanceId);
         for (int i = 0; i < theaterRoom.GetZones().Length; i++)
@@ -155,15 +165,15 @@ public class TheaterService
     }
 
 
-    public static void Main(String[] args)
+    public static void Main(string[] args)
     {
         Performance performance = new Performance();
         performance.id = 1L;
         performance.play = "The CICD by Corneille";
         performance.startTime = new DateTime(2023, 04, 22, 21, 0, 0);
         performance.performanceNature = "PREMIERE";
-        TheaterService theaterService = new TheaterService(new AllocationQuotas());
-        TicketPrinter ticketPrinter = new TicketPrinter(theaterService);
+        ReservationAgent reservationAgent = new ReservationAgent(new AllocationQuotas());
+        TicketPrinter ticketPrinter = new TicketPrinter(reservationAgent);
         Console.WriteLine(ticketPrinter.Reservation(1L, 4, "STANDARD",
             performance));
 

@@ -1,4 +1,4 @@
-﻿using TheaterReservation.Data;
+﻿using TheaterReservation.Domain.Reservation;
 
 namespace TheaterReservation.Dao;
 

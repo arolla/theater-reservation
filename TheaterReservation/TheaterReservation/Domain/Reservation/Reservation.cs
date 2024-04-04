@@ -1,51 +1,51 @@
-﻿namespace TheaterReservation.Data;
+﻿namespace TheaterReservation.Domain.Reservation;
 
 public class Reservation
 {
-    private Int64 reservationId;
+    private long reservationId;
 
-    private Int64 performanceId;
+    private long performanceId;
 
-    private String status;
+    private string status;
 
-    private String[] seats;
+    private string[] seats;
 
-    public Int64 GetReservationId()
+    public long GetReservationId()
     {
         return reservationId;
     }
 
-    public void SetReservationId(Int64 reservationId)
+    public void SetReservationId(long reservationId)
     {
         this.reservationId = reservationId;
     }
 
-    public Int64 GetPerformanceId()
+    public long GetPerformanceId()
     {
         return performanceId;
     }
 
-    public void SetPerformanceId(Int64 performanceId)
+    public void SetPerformanceId(long performanceId)
     {
         this.performanceId = performanceId;
     }
 
-    public void SetStatus(String status)
+    public void SetStatus(string status)
     {
         this.status = status;
     }
 
-    public String[] GetSeats()
+    public string[] GetSeats()
     {
         return seats;
     }
 
-    public void SetSeats(String[] seats)
+    public void SetSeats(string[] seats)
     {
         this.seats = seats;
     }
-    
-    public override String ToString()
+
+    public override string ToString()
     {
         return "Reservation{" +
                "reservationId=" + reservationId +

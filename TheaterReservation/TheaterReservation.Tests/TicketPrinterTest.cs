@@ -1,6 +1,7 @@
 using ApprovalTests;
 using ApprovalTests.Reporters;
 using TheaterReservation.Data;
+using TheaterReservation.Domain.Reservation;
 using TheaterReservation.Exposition;
 using TheaterReservation.Infra;
 
@@ -11,13 +12,13 @@ namespace TheaterReservation.Tests
     public class TicketPrinterTest
     {
         private TicketPrinter ticketPrinter;
-        private TheaterService theaterService;
+        private ReservationAgent _reservationAgent;
 
         [TestInitialize]
         public void Setup()
         {
-            theaterService = new TheaterService(new AllocationQuotas());
-            ticketPrinter = new TicketPrinter(theaterService);
+            _reservationAgent = new ReservationAgent(new AllocationQuotas());
+            ticketPrinter = new TicketPrinter(_reservationAgent);
         }
 
         [TestMethod]
@@ -57,7 +58,7 @@ namespace TheaterReservation.Tests
             String reservation1 = ticketPrinter.Reservation(1L, 1, "STANDARD",
                 performance);
             List<string> seats = new List<string> { "B2" };
-            theaterService.CancelReservation("123456", 1L, seats);
+            _reservationAgent.CancelReservation("123456", 1L, seats);
             String reservation = ticketPrinter.Reservation(1L, 4, "STANDARD",
                 performance);
             Approvals.Verify(reservation);
