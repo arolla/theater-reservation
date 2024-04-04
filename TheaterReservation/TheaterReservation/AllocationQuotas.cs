@@ -3,16 +3,21 @@ using TheaterReservation.Domain.Allocation;
 
 namespace TheaterReservation;
 
-public class AllocationQuotas
+public interface IAllocationQuotas
 {
-    public AllocationQuotaSpecification GetVipQuotaSpecification(Performance performance)
+    AllocationQuotaSpecification GetVipQuota(Performance performance);
+}
+
+public class AllocationQuotas : IAllocationQuotas
+{
+    public AllocationQuotaSpecification GetVipQuota(Performance performance)
     {
-        var vipQuota = GetVipQuota(performance);
+        var vipQuota = GetVipQuotaValue(performance);
         var allocationQuotaSpecification = new AllocationQuotaSpecification(vipQuota);
         return allocationQuotaSpecification;
     }
 
-    private double GetVipQuota(Performance performance)
+    private double GetVipQuotaValue(Performance performance)
     {
         switch (performance.performanceNature)
         {
