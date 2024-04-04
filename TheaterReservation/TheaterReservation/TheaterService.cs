@@ -77,17 +77,35 @@ public class TheaterService
 
         var premiere = 0.5;
         var premiereValue = "PREMIERE";
-        if (performance.performanceNature.Equals(premiereValue) && remainingSeats < totalSeats * premiere)
+        if (performance.performanceNature.Equals(premiereValue))
         {
-            reservedSeats = new List<ReservationSeat>();
+            if (remainingSeats < totalSeats * premiere)
+            {
+                reservedSeats = new List<ReservationSeat>();
+            }
+            else
+            {
+                var preview = 0.9;
+                var previewValue = "PREVIEW";
+                if (performance.performanceNature.Equals(previewValue))
+                {
+                    if (remainingSeats < totalSeats * preview)
+                    {
+                        reservedSeats = new List<ReservationSeat>();
+                    }
+                }
+            }
         }
         else
         {
             var preview = 0.9;
             var previewValue = "PREVIEW";
-            if (performance.performanceNature.Equals(previewValue) && remainingSeats < totalSeats * preview)
+            if (performance.performanceNature.Equals(previewValue))
             {
-                reservedSeats = new List<ReservationSeat>();
+                if (remainingSeats < totalSeats * preview)
+                {
+                    reservedSeats = new List<ReservationSeat>();
+                }
             }
         }
 
