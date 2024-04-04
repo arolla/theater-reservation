@@ -79,34 +79,17 @@ public class TheaterService
         var performanceNature = "PREMIERE";
         if (performance.performanceNature.Equals(performanceNature))
         {
-            if (remainingSeats < totalSeats * vipQuota)
-            {
-                reservedSeats = new List<ReservationSeat>();
-            }
-            else
-            {
-                vipQuota = 0.9;
-                performanceNature = "PREVIEW";
-                if (performance.performanceNature.Equals(performanceNature))
-                {
-                    if (remainingSeats < totalSeats * vipQuota)
-                    {
-                        reservedSeats = new List<ReservationSeat>();
-                    }
-                }
-            }
+            
         }
         else
         {
             vipQuota = 0.9;
             performanceNature = "PREVIEW";
-            if (performance.performanceNature.Equals(performanceNature))
-            {
-                if (remainingSeats < totalSeats * vipQuota)
-                {
-                    reservedSeats = new List<ReservationSeat>();
-                }
-            }
+        }
+
+        if (remainingSeats < totalSeats * vipQuota)
+        {
+            reservedSeats = new List<ReservationSeat>();
         }
 
         reservation.SetSeats(reservedSeats.Select(r => r.Seat).ToArray());
