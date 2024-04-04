@@ -4,14 +4,14 @@ namespace TheaterReservation.Infra;
 
 public class AllocationQuotas : IAllocationQuotas
 {
-    public AllocationQuotaSpecification GetVipQuota(PerformanceNature performanceNature)
+    public AllocationQuotaSpecification Find(PerformanceNature performanceNature)
     {
-        var vipQuota = GetVipQuotaValue(performanceNature);
+        var vipQuota = GetVipQuota(performanceNature);
         var allocationQuotaSpecification = new AllocationQuotaSpecification(vipQuota);
         return allocationQuotaSpecification;
     }
 
-    private double GetVipQuotaValue(PerformanceNature performanceNature)
+    private double GetVipQuota(PerformanceNature performanceNature)
     {
         var performancePerformanceNature = performanceNature.Value;
         switch (performancePerformanceNature)

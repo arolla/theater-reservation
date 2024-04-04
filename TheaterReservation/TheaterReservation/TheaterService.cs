@@ -29,7 +29,7 @@ public class TheaterService
         TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
         String res_id = ReservationService.InitNewReservation();
         var performanceNature = new PerformanceNature(performance.performanceNature);
-        var allocationQuotaSpecification = allocationQuotas.GetVipQuota(performanceNature);
+        var allocationQuotaSpecification = allocationQuotas.Find(performanceNature);
 
         Reservation reservation = new Reservation();
         reservation.SetReservationId(Convert.ToInt64(res_id));
