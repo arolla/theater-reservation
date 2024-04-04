@@ -75,21 +75,21 @@ public class TheaterService
             }
         }
 
-        var premiere = 0.5;
-        var premiereValue = "PREMIERE";
-        if (performance.performanceNature.Equals(premiereValue))
+        var vipQuota = 0.5;
+        var performanceNature = "PREMIERE";
+        if (performance.performanceNature.Equals(performanceNature))
         {
-            if (remainingSeats < totalSeats * premiere)
+            if (remainingSeats < totalSeats * vipQuota)
             {
                 reservedSeats = new List<ReservationSeat>();
             }
             else
             {
-                var preview = 0.9;
-                var previewValue = "PREVIEW";
-                if (performance.performanceNature.Equals(previewValue))
+                vipQuota = 0.9;
+                performanceNature = "PREVIEW";
+                if (performance.performanceNature.Equals(performanceNature))
                 {
-                    if (remainingSeats < totalSeats * preview)
+                    if (remainingSeats < totalSeats * vipQuota)
                     {
                         reservedSeats = new List<ReservationSeat>();
                     }
@@ -98,11 +98,11 @@ public class TheaterService
         }
         else
         {
-            var preview = 0.9;
-            var previewValue = "PREVIEW";
-            if (performance.performanceNature.Equals(previewValue))
+            vipQuota = 0.9;
+            performanceNature = "PREVIEW";
+            if (performance.performanceNature.Equals(performanceNature))
             {
-                if (remainingSeats < totalSeats * preview)
+                if (remainingSeats < totalSeats * vipQuota)
                 {
                     reservedSeats = new List<ReservationSeat>();
                 }
