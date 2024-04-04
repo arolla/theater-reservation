@@ -2,7 +2,6 @@
 
 public class Row
 {
-
     private Seat[] seats;
 
     public Row(Seat[] seats)
@@ -13,10 +12,5 @@ public class Row
     public Seat[] GetSeats()
     {
         return seats;
-    }
-
-    public void SetSeats(Seat[] seats)
-    {
-        this.seats = seats;
     }
 }

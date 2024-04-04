@@ -16,19 +16,9 @@ public class Zone
     {
         return rows;
     }
-
-    public void SetRows(Row[] rows)
-    {
-        this.rows = rows;
-    }
-
+    
     public String GetCategory()
     {
         return category;
-    }
-
-    public void SetCategory(String category)
-    {
-        this.category = category;
     }
 }

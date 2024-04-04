@@ -30,11 +30,6 @@ public class Reservation
         this.performanceId = performanceId;
     }
 
-    public String GetStatus()
-    {
-        return status;
-    }
-
     public void SetStatus(String status)
     {
         this.status = status;

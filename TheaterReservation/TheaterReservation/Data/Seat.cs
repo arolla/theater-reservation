@@ -16,12 +16,7 @@ public class Seat
     {
         return seatId;
     }
-
-    public void SetSeatId(String seatId)
-    {
-        this.seatId = seatId;
-    }
-
+    
     public String GetStatus()
     {
         return status;
