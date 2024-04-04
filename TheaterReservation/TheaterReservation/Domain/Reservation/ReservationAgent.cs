@@ -35,8 +35,12 @@ public class ReservationAgent
         reservation.SetReservationId(Convert.ToInt64(reservationId));
         reservation.SetPerformanceId(performance.id);
 
-        var reservedSeats = AllocateSeats(reservationCount, reservationCategory, room, allocationQuota);
+        TheaterTopology theaterTopology = TheaterTopology.From(room);
+        PerformanceAllocation performanceAllocation = new PerformanceAllocation(theaterTopology, room.GetFreeSeats(), reservationCount, reservationCategory,
+            allocationQuota);
 
+        List<ReservationSeat> reservedSeats = performanceAllocation.FindSeatsForReservation();
+        
         reservation.SetSeats(reservedSeats.Select(r => r.Seat).ToArray());
 
         // calculate raw price
@@ -75,21 +79,6 @@ public class ReservationAgent
         TheaterSession theaterSession = new TheaterSession(performance.play, performance.startTime);
         var reservationRequest = new ReservationRequest(reservationCategory, reservationId, reservedSeats, total, theaterSession);
         return reservationRequest;
-    }
-
-    private static List<ReservationSeat> AllocateSeats(int reservationCount, string reservationCategory, TheaterRoom room,
-        AllocationQuotaSpecification allocationQuota)
-    {
-        TheaterTopology theaterTopology = TheaterTopology.From(room);
-        PerformanceAllocation performanceAllocation = new PerformanceAllocation(theaterTopology, room.GetFreeSeats(), reservationCount, reservationCategory);
-
-        List<ReservationSeat> reservedSeats = performanceAllocation.FindSeatsForReservation();
-        if (allocationQuota.IsSatisfiedBy(performanceAllocation.GetPerformanceInventory()))
-        {
-            reservedSeats = new List<ReservationSeat>();
-        }
-
-        return reservedSeats;
     }
 
     public void CancelReservation(string reservationId, long performanceId, List<string> seats)
