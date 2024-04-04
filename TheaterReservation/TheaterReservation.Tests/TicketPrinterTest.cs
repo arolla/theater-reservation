@@ -15,7 +15,7 @@ namespace TheaterReservation.Tests
         [TestInitialize]
         public void Setup()
         {
-            theaterService = new TheaterService();
+            theaterService = new TheaterService(new AllocationQuotas());
             ticketPrinter = new TicketPrinter(theaterService);
         }
 

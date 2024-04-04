@@ -1,6 +1,7 @@
 ﻿using TheaterReservation.Dao;
 using TheaterReservation.Data;
 using TheaterReservation.Domain;
+using TheaterReservation.Domain.Allocation;
 using TheaterReservation.Exposition;
 
 namespace TheaterReservation;
@@ -9,6 +10,12 @@ public class TheaterService
 {
     private readonly TheaterRoomDao theaterRoomDao = new TheaterRoomDao();
     private readonly PerformancePriceDao performancePriceDao = new PerformancePriceDao();
+    private readonly AllocationQuotas allocationQuotas;
+
+    public TheaterService(AllocationQuotas quotas)
+    {
+        allocationQuotas = quotas;
+    }
 
     public ReservationRequest Reserve(long customerId, int reservationCount, string reservationCategory,
         Performance performance)
@@ -75,9 +82,9 @@ public class TheaterService
             }
         }
 
-        var vipQuota = GetVipQuota(performance);
-
-        if (new AllocationQuotaPredicate(remainingSeats, totalSeats, vipQuota).CanReserve())
+        var vipQuota = allocationQuotas.GetVipQuota(performance);
+        PerformanceInventory performanceInventory = new PerformanceInventory(remainingSeats, totalSeats);
+        if (new AllocationQuotaSpecification(vipQuota).IsSatisfiedBy(performanceInventory))
         {
             reservedSeats = new List<ReservationSeat>();
         }
@@ -120,19 +127,6 @@ public class TheaterService
         return reservationRequest;
     }
 
-    private static double GetVipQuota(Performance performance)
-    {
-        switch (performance.performanceNature)
-        {
-            case "PREMIERE":
-                return 0.5;
-            case "PREVIEW":
-                return 0.9;
-            default:
-                return -1;
-        }
-    }
-
     public void CancelReservation(String reservationId, Int64 performanceId, List<String> seats)
     {
         TheaterRoom theaterRoom = theaterRoomDao.FetchTheaterRoom(performanceId);
@@ -164,7 +158,7 @@ public class TheaterService
         performance.play = "The CICD by Corneille";
         performance.startTime = new DateTime(2023, 04, 22, 21, 0, 0);
         performance.performanceNature = "PREMIERE";
-        TheaterService theaterService = new TheaterService();
+        TheaterService theaterService = new TheaterService(new AllocationQuotas());
         TicketPrinter ticketPrinter = new TicketPrinter(theaterService);
         Console.WriteLine(ticketPrinter.Reservation(1L, 4, "STANDARD",
             performance));
