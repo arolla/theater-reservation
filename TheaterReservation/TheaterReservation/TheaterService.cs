@@ -19,7 +19,7 @@ public class TheaterService
         var performancePrice = performancePriceDao.FetchPerformancePrice(performance.id);
         TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
         String res_id = ReservationService.InitNewReservation();
-       
+
         Reservation reservation = new Reservation();
         reservation.SetReservationId(Convert.ToInt64(res_id));
         reservation.SetPerformanceId(performance.id);
@@ -75,17 +75,7 @@ public class TheaterService
             }
         }
 
-        var vipQuota = 0.5;
-        var performanceNature = "PREMIERE";
-        if (performance.performanceNature.Equals(performanceNature))
-        {
-            
-        }
-        else
-        {
-            vipQuota = 0.9;
-            performanceNature = "PREVIEW";
-        }
+        var vipQuota = GetVipQuota(performance);
 
         if (remainingSeats < totalSeats * vipQuota)
         {
@@ -128,6 +118,19 @@ public class TheaterService
 
         var reservationRequest = new ReservationRequest(reservationCategory, performance, res_id, reservedSeats, total);
         return reservationRequest;
+    }
+
+    private static double GetVipQuota(Performance performance)
+    {
+        switch (performance.performanceNature)
+        {
+            case "PREMIERE":
+                return 0.5;
+            case "PREVIEW":
+                return 0.9;
+            default:
+                return -1;
+        }
     }
 
     public void CancelReservation(String reservationId, Int64 performanceId, List<String> seats)
