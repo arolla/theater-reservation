@@ -10,9 +10,9 @@ public class TheaterService
 {
     private readonly TheaterRoomDao theaterRoomDao = new TheaterRoomDao();
     private readonly PerformancePriceDao performancePriceDao = new PerformancePriceDao();
-    private readonly AllocationQuotas allocationQuotas;
+    private readonly IAllocationQuotas allocationQuotas;
 
-    public TheaterService(AllocationQuotas quotas)
+    public TheaterService(IAllocationQuotas quotas)
     {
         allocationQuotas = quotas;
     }
