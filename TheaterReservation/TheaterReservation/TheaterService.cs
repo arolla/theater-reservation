@@ -9,7 +9,7 @@ public class TheaterService
 {
     private readonly TheaterRoomDao theaterRoomDao = new TheaterRoomDao();
     private readonly PerformancePriceDao performancePriceDao = new PerformancePriceDao();
-        
+
     public ReservationRequest Reserve(long customerId, int reservationCount, string reservationCategory,
         Performance performance)
     {
@@ -18,12 +18,16 @@ public class TheaterService
         int remainingSeats = 0;
         int totalSeats = 0;
         bool foundAllSeats = false;
+        CustomerSubscriptionDao customerSubscriptionDao = new CustomerSubscriptionDao();
+        bool isSubscribed = customerSubscriptionDao.FetchCustomerSubscription(customerId);
+        var voucherProgramDiscount = VoucherProgramDao.FetchVoucherProgram(performance.startTime);
+        var performancePrice = performancePriceDao.FetchPerformancePrice(performance.id);
+        TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
 
         String res_id = ReservationService.InitNewReservation();
         reservation.SetReservationId(Convert.ToInt64(res_id));
         reservation.SetPerformanceId(performance.id);
 
-        TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
         List<ReservationSeat> reservedSeats = new List<ReservationSeat>();
         // find "reservationCount" first contiguous seats in any row
         for (int i = 0; i < room.GetZones().Length; i++)
@@ -71,7 +75,7 @@ public class TheaterService
                 }
             }
         }
-        
+
         if (performance.performanceNature.Equals("PREMIERE") && remainingSeats < totalSeats * 0.5)
         {
             reservedSeats = new List<ReservationSeat>();
@@ -82,9 +86,9 @@ public class TheaterService
         }
 
         reservation.SetSeats(reservedSeats.Select(r => r.Seat).ToArray());
-        
+
         // calculate raw price
-        Amount myPrice = new Amount(performancePriceDao.FetchPerformancePrice(performance.id));
+        Amount myPrice = new Amount(performancePrice);
 
         Amount intialPrice = Amount.Nothing();
         foreach (var reservedSeat in reservedSeats)
@@ -94,10 +98,8 @@ public class TheaterService
         }
 
         // check and apply discounts and fidelity program
-        Rate discountTime = new Rate(VoucherProgramDao.FetchVoucherProgram(performance.startTime));
+        Rate discountTime = new Rate(voucherProgramDiscount);
 
-        CustomerSubscriptionDao customerSubscriptionDao = new CustomerSubscriptionDao();
-        bool isSubscribed = customerSubscriptionDao.FetchCustomerSubscription(customerId);
 
         Amount totalBilling = new Amount(intialPrice);
         if (isSubscribed)
@@ -108,7 +110,7 @@ public class TheaterService
 
         Rate discountRatio = Rate.Fully().Subtract(discountTime);
         String total = totalBilling.Apply(discountRatio).AsString() + "€";
-        
+
         if (foundAllSeats)
         {
             theaterRoomDao.SaveSeats(performance.id,
@@ -120,7 +122,7 @@ public class TheaterService
         var reservationRequest = new ReservationRequest(reservationCategory, performance, res_id, reservedSeats, total);
         return reservationRequest;
     }
-        
+
     public void CancelReservation(String reservationId, Int64 performanceId, List<String> seats)
     {
         TheaterRoom theaterRoom = theaterRoomDao.FetchTheaterRoom(performanceId);
