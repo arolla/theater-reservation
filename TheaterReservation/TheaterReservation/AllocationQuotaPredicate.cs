@@ -2,19 +2,19 @@ namespace TheaterReservation;
 
 public class AllocationQuotaPredicate
 {
-    private int remainingSeats;
-    private int totalSeats;
-    private double vipQuota;
+    private int availableSeatsCount;
+    private int totalSeatsCount;
+    private double shelvingQuota;
 
-    public AllocationQuotaPredicate(int remainingSeats, int totalSeats, double vipQuota)
+    public AllocationQuotaPredicate(int availableSeatsCount, int totalSeatsCount, double shelvingQuota)
     {
-        this.remainingSeats = remainingSeats;
-        this.totalSeats = totalSeats;
-        this.vipQuota = vipQuota;
+        this.availableSeatsCount = availableSeatsCount;
+        this.totalSeatsCount = totalSeatsCount;
+        this.shelvingQuota = shelvingQuota;
     }
 
     public bool CanReserve()
     {
-        return remainingSeats < totalSeats * vipQuota;
+        return availableSeatsCount < totalSeatsCount * shelvingQuota;
     }
 }
