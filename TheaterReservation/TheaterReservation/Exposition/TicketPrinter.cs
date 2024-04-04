@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using TheaterReservation.Data;
+using TheaterReservation.Domain.Reservation;
 
 namespace TheaterReservation.Exposition
 {

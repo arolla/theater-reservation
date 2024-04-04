@@ -2,5 +2,5 @@ namespace TheaterReservation.Domain.Allocation;
 
 public interface IAllocationQuotas
 {
-    AllocationQuotaSpecification GetVipQuota(AllocationQuotaCriteria allocationQuotaCriteria);
+    AllocationQuotaSpecification GetVipQuota(PerformanceNature performanceNature);
 }

@@ -1,34 +1,33 @@
 ﻿using System.Globalization;
 using System.Text;
-using TheaterReservation.Data;
 
-namespace TheaterReservation;
+namespace TheaterReservation.Domain.Reservation;
 
 public class ReservationRequest
 {
-    public ReservationRequest(string reservationCategory, Performance performance, string reservationId, List<ReservationSeat> reservedSeats, string totalBilling)
+    public ReservationRequest(string reservationCategory, string reservationId, List<ReservationSeat> reservedSeats, string totalBilling, TheaterSession theaterSession)
     {
         ReservationCategory = reservationCategory;
-        Performance = performance;
         ReservationId = reservationId;
         ReservedSeats = reservedSeats;
         TotalBilling = totalBilling;
+        TheaterSession = theaterSession;
     }
 
     public string ReservationCategory { get; }
-    public Performance Performance { get; }
+    public TheaterSession TheaterSession { get; }
     public string ReservationId { get; }
     public List<ReservationSeat> ReservedSeats { get; }
     public string TotalBilling { get; }
 
     public string GetPerformanceTitle()
     {
-        return Performance.play;
+        return TheaterSession.Title;
     }
 
     public string GetStartDate()
     {
-        return Performance.startTime.ToString();
+        return TheaterSession.StartTime.ToString();
     }
 
     public bool IsFulfillable()

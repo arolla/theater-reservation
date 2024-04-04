@@ -2,7 +2,9 @@
 using TheaterReservation.Data;
 using TheaterReservation.Domain;
 using TheaterReservation.Domain.Allocation;
+using TheaterReservation.Domain.Reservation;
 using TheaterReservation.Exposition;
+using TheaterReservation.Infra;
 
 namespace TheaterReservation;
 
@@ -26,6 +28,8 @@ public class TheaterService
         var performancePrice = performancePriceDao.FetchPerformancePrice(performance.id);
         TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
         String res_id = ReservationService.InitNewReservation();
+        var performanceNature = new PerformanceNature(performance.performanceNature);
+        var allocationQuotaSpecification = allocationQuotas.GetVipQuota(performanceNature);
 
         Reservation reservation = new Reservation();
         reservation.SetReservationId(Convert.ToInt64(res_id));
@@ -82,8 +86,6 @@ public class TheaterService
             }
         }
 
-        var allocationQuotaCriteria = new AllocationQuotaCriteria(performance.performanceNature);
-        var allocationQuotaSpecification = allocationQuotas.GetVipQuota(allocationQuotaCriteria);
         PerformanceInventory performanceInventory = new PerformanceInventory(remainingSeats, totalSeats);
         if (allocationQuotaSpecification.IsSatisfiedBy(performanceInventory))
         {
@@ -124,7 +126,8 @@ public class TheaterService
         }
         ReservationService.UpdateReservation(reservation);
 
-        var reservationRequest = new ReservationRequest(reservationCategory, performance, res_id, reservedSeats, total);
+        TheaterSession theaterSession = new TheaterSession(performance.play, performance.startTime);
+        var reservationRequest = new ReservationRequest(reservationCategory, res_id, reservedSeats, total, theaterSession);
         return reservationRequest;
     }
 
