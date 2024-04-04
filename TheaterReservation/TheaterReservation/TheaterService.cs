@@ -69,13 +69,6 @@ public class TheaterService
                         streakOfNotReservedSeats = 0;
                     }
                 }
-
-                if (foundAllSeats)
-                {
-                    theaterRoomDao.SaveSeats(performance.id,
-                        reservedSeats.Select(r => r.Seat).ToList()
-                        , "BOOKING_PENDING");
-                }
             }
         }
         
@@ -90,8 +83,6 @@ public class TheaterService
 
         reservation.SetSeats(reservedSeats.Select(r => r.Seat).ToArray());
         
-        ReservationService.UpdateReservation(reservation);
-
         // calculate raw price
         Amount myPrice = new Amount(performancePriceDao.FetchPerformancePrice(performance.id));
 
@@ -117,6 +108,14 @@ public class TheaterService
 
         Rate discountRatio = Rate.Fully().Subtract(discountTime);
         String total = totalBilling.Apply(discountRatio).AsString() + "€";
+        
+        if (foundAllSeats)
+        {
+            theaterRoomDao.SaveSeats(performance.id,
+                reservedSeats.Select(r => r.Seat).ToList()
+                , "BOOKING_PENDING");
+        }
+        ReservationService.UpdateReservation(reservation);
 
         var reservationRequest = new ReservationRequest(reservationCategory, performance, res_id, reservedSeats, total);
         return reservationRequest;
