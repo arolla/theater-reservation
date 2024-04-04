@@ -13,4 +13,17 @@ public class TheaterRoom
     {
         return zones;
     }
+    public List<Seat> GetAllSeats()
+    {
+        return zones.SelectMany(z =>
+            z.GetRows().SelectMany(r => r.GetSeats()))
+            .ToList();
+    }
+
+    public List<String> GetFreeSeats()
+    {
+        return GetAllSeats().Where(s => s.isFree())
+            .Select(s => s.GetSeatId())
+            .ToList();
+    }
 }

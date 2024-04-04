@@ -4,7 +4,7 @@ public class VoucherProgramDao
 {
     public static decimal FetchVoucherProgram(DateTime now)
     {
-        // applies from reservation date, not performance date
+        // applies From reservation date, not performance date
         decimal voucher = 0m;
         if (now < new DateTime(2023, 04, 30))
         {

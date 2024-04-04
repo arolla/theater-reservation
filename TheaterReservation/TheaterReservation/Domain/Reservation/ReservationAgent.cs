@@ -2,6 +2,7 @@
 using TheaterReservation.Data;
 using TheaterReservation.Domain;
 using TheaterReservation.Domain.Allocation;
+using TheaterReservation.Domain.Topology;
 using TheaterReservation.Exposition;
 using TheaterReservation.Infra;
 
@@ -28,78 +29,13 @@ public class ReservationAgent
         TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
         string reservationId = ReservationService.InitNewReservation();
         var performanceNature = new PerformanceNature(performance.performanceNature);
-        var allocationQuotaSpecification = allocationQuotas.Find(performanceNature);
+        var allocationQuota = allocationQuotas.Find(performanceNature);
 
         Reservation reservation = new Reservation();
         reservation.SetReservationId(Convert.ToInt64(reservationId));
         reservation.SetPerformanceId(performance.id);
-        int remainingSeats = 0;
-        int totalSeats = 0;
-        bool foundAllSeats = false;
-        List<ReservationSeat> reservedSeats = new List<ReservationSeat>();
 
-        return AllocateSeats(reservationCount, reservationCategory, performance, room,
-            totalSeats, remainingSeats, foundAllSeats, reservedSeats, allocationQuotaSpecification,
-            reservation, performancePrice, voucherProgramDiscount, isSubscribed, reservationId);
-    }
-
-    private ReservationRequest AllocateSeats(int reservationCount, string reservationCategory, Performance performance,
-        TheaterRoom room, int totalSeats, int remainingSeats, bool foundAllSeats, List<ReservationSeat> reservedSeats,
-        AllocationQuotaSpecification allocationQuotaSpecification, Reservation reservation, decimal performancePrice,
-        decimal voucherProgramDiscount, bool isSubscribed, string reservationId)
-    {
-        // find "reservationCount" first contiguous seats in any row
-        for (int i = 0; i < room.GetZones().Length; i++)
-        {
-            Zone zone = room.GetZones()[i];
-            var zoneCategory = zone.GetCategory();
-            for (int j = 0; j < zone.GetRows().Length; j++)
-            {
-                Row row = zone.GetRows()[j];
-                List<string> seatsForRow = new List<string>();
-                int streakOfNotReservedSeats = 0;
-                for (int k = 0; k < row.GetSeats().Length; k++)
-                {
-                    totalSeats++; // devrait être dans une série de boucles différentes mais ça permet qq ns
-                    Seat aSeat = row.GetSeats()[k];
-                    if (!aSeat.GetStatus().Equals("BOOKED") && !aSeat.GetStatus().Equals("BOOKING_PENDING"))
-                    {
-                        remainingSeats++;
-                        if (!reservationCategory.Equals(zoneCategory))
-                        {
-                            continue;
-                        }
-
-                        if (!foundAllSeats)
-                        {
-                            seatsForRow.Add(aSeat.GetSeatId());
-                            streakOfNotReservedSeats++;
-                            if (streakOfNotReservedSeats >= reservationCount)
-                            {
-                                foreach (string seat in seatsForRow)
-                                {
-                                    reservedSeats.Add(new ReservationSeat(seat, zoneCategory));
-                                }
-
-                                foundAllSeats = true;
-                                remainingSeats -= streakOfNotReservedSeats;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        seatsForRow = new List<string>();
-                        streakOfNotReservedSeats = 0;
-                    }
-                }
-            }
-        }
-
-        PerformanceInventory performanceInventory = new PerformanceInventory(remainingSeats, totalSeats);
-        if (allocationQuotaSpecification.IsSatisfiedBy(performanceInventory))
-        {
-            reservedSeats = new List<ReservationSeat>();
-        }
+        var reservedSeats = AllocateSeats(reservationCount, reservationCategory, room, allocationQuota);
 
         reservation.SetSeats(reservedSeats.Select(r => r.Seat).ToArray());
 
@@ -127,7 +63,7 @@ public class ReservationAgent
         Rate discountRatio = Rate.Fully().Subtract(discountTime);
         string total = totalBilling.Apply(discountRatio).AsString() + "€";
 
-        if (foundAllSeats)
+        if (reservedSeats.Count != 0)
         {
             theaterRoomDao.SaveSeats(performance.id,
                 reservedSeats.Select(r => r.Seat).ToList()
@@ -139,6 +75,26 @@ public class ReservationAgent
         TheaterSession theaterSession = new TheaterSession(performance.play, performance.startTime);
         var reservationRequest = new ReservationRequest(reservationCategory, reservationId, reservedSeats, total, theaterSession);
         return reservationRequest;
+    }
+
+    private static List<ReservationSeat> AllocateSeats(int reservationCount, string reservationCategory, TheaterRoom room,
+        AllocationQuotaSpecification allocationQuota)
+    {
+        TheaterTopology theaterTopology = TheaterTopology.From(room);
+        PerformanceAllocation performanceAllocation = new PerformanceAllocation(theaterTopology, room.GetFreeSeats());
+
+        List<ReservationSeat> reservedSeats =
+            performanceAllocation.FindSeatsForReservation(reservationCount, reservationCategory);
+
+        PerformanceInventory performanceInventory = new PerformanceInventory(
+            performanceAllocation.GetFreeSeatCount() - reservedSeats.Count(),
+            performanceAllocation.GetTotalSeatCount());
+        if (allocationQuota.IsSatisfiedBy(performanceInventory))
+        {
+            reservedSeats = new List<ReservationSeat>();
+        }
+
+        return reservedSeats;
     }
 
     public void CancelReservation(string reservationId, long performanceId, List<string> seats)

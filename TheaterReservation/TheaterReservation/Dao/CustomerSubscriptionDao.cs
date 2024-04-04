@@ -4,7 +4,7 @@ namespace TheaterReservation.Dao
 {
     public class CustomerSubscriptionDao
     {
-        // simulates fetching data from Customer advantages
+        // simulates fetching data From Customer advantages
         public bool FetchCustomerSubscription(Int64 customerId)
         {
             bool isSubscribed = false;

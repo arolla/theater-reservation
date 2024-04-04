@@ -26,7 +26,13 @@ public class Seat
     {
         this.status = status;
     }
-        
+
+    public bool isFree()
+    {
+        return "FREE".Equals(GetStatus());
+    }
+
+
     public override String ToString()
     {
         return "Seat{" +
