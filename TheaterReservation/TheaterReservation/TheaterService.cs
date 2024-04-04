@@ -13,21 +13,20 @@ public class TheaterService
     public ReservationRequest Reserve(long customerId, int reservationCount, string reservationCategory,
         Performance performance)
     {
-        Reservation reservation = new Reservation();
-        String zoneCategory;
-        int remainingSeats = 0;
-        int totalSeats = 0;
-        bool foundAllSeats = false;
         CustomerSubscriptionDao customerSubscriptionDao = new CustomerSubscriptionDao();
         bool isSubscribed = customerSubscriptionDao.FetchCustomerSubscription(customerId);
         var voucherProgramDiscount = VoucherProgramDao.FetchVoucherProgram(performance.startTime);
         var performancePrice = performancePriceDao.FetchPerformancePrice(performance.id);
         TheaterRoom room = theaterRoomDao.FetchTheaterRoom(performance.id);
-
         String res_id = ReservationService.InitNewReservation();
+       
+        Reservation reservation = new Reservation();
         reservation.SetReservationId(Convert.ToInt64(res_id));
         reservation.SetPerformanceId(performance.id);
-
+        String zoneCategory;
+        int remainingSeats = 0;
+        int totalSeats = 0;
+        bool foundAllSeats = false;
         List<ReservationSeat> reservedSeats = new List<ReservationSeat>();
         // find "reservationCount" first contiguous seats in any row
         for (int i = 0; i < room.GetZones().Length; i++)
