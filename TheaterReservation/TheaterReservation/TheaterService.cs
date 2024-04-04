@@ -78,20 +78,7 @@ public class TheaterService
                 }
             }
         }
-
-        reservation.SetSeats(reservedSeats.Select(r => r.Seat).ToArray());
-
-        if (reservedSeats.Count != 0)
-        {
-            reservation.SetStatus("PENDING");
-        }
-        else
-        {
-            reservation.SetStatus("ABORTED");
-        }
-
-        ReservationService.UpdateReservation(reservation);
-
+        
         if (performance.performanceNature.Equals("PREMIERE") && remainingSeats < totalSeats * 0.5)
         {
             reservedSeats = new List<ReservationSeat>();
@@ -100,6 +87,10 @@ public class TheaterService
         {
             reservedSeats = new List<ReservationSeat>();
         }
+
+        reservation.SetSeats(reservedSeats.Select(r => r.Seat).ToArray());
+        
+        ReservationService.UpdateReservation(reservation);
 
         // calculate raw price
         Amount myPrice = new Amount(performancePriceDao.FetchPerformancePrice(performance.id));
