@@ -2,6 +2,7 @@ using ApprovalTests;
 using ApprovalTests.Reporters;
 using TheaterReservation.Data;
 using TheaterReservation.Exposition;
+using TheaterReservation.Infra;
 
 namespace TheaterReservation.Tests
 {

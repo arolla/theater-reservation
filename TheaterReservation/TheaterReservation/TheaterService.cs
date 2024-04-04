@@ -82,7 +82,8 @@ public class TheaterService
             }
         }
 
-        var allocationQuotaSpecification = allocationQuotas.GetVipQuota(performance);
+        var allocationQuotaCriteria = new AllocationQuotaCriteria(performance.performanceNature);
+        var allocationQuotaSpecification = allocationQuotas.GetVipQuota(allocationQuotaCriteria);
         PerformanceInventory performanceInventory = new PerformanceInventory(remainingSeats, totalSeats);
         if (allocationQuotaSpecification.IsSatisfiedBy(performanceInventory))
         {

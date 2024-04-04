@@ -1,25 +1,20 @@
-using TheaterReservation.Data;
 using TheaterReservation.Domain.Allocation;
 
-namespace TheaterReservation;
-
-public interface IAllocationQuotas
-{
-    AllocationQuotaSpecification GetVipQuota(Performance performance);
-}
+namespace TheaterReservation.Infra;
 
 public class AllocationQuotas : IAllocationQuotas
 {
-    public AllocationQuotaSpecification GetVipQuota(Performance performance)
+    public AllocationQuotaSpecification GetVipQuota(AllocationQuotaCriteria allocationQuotaCriteria)
     {
-        var vipQuota = GetVipQuotaValue(performance);
+        var vipQuota = GetVipQuotaValue(allocationQuotaCriteria);
         var allocationQuotaSpecification = new AllocationQuotaSpecification(vipQuota);
         return allocationQuotaSpecification;
     }
 
-    private double GetVipQuotaValue(Performance performance)
+    private double GetVipQuotaValue(AllocationQuotaCriteria allocationQuotaCriteria)
     {
-        switch (performance.performanceNature)
+        var performancePerformanceNature = allocationQuotaCriteria.PerformanceNature;
+        switch (performancePerformanceNature)
         {
             case "PREMIERE":
                 return 0.5;
