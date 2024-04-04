@@ -22,38 +22,39 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TheaterServiceTest.cancel_then_reserve_on_premiere_performance_with_standard_category.approved.txt">
+    <None Update="TicketPrinterTest.cancel_then_reserve_on_premiere_performance_with_standard_category.approved.txt">
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
-      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+      <DependentUpon>TicketPrinterTest.cs</DependentUpon>
     </None>
-    <None Update="TheaterServiceTest.reservation_failed_on_premiere_performance.approved.txt">
+    <None Update="TicketPrinterTest.reservation_failed_on_premiere_performance.approved.txt">
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
-      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+      <DependentUpon>TicketPrinterTest.cs</DependentUpon>
     </None>
-    <None Update="TheaterServiceTest.reservation_failed_on_preview_performance.approved.txt">
+    <None Update="TicketPrinterTest.reservation_failed_on_preview_performance.approved.txt">
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
-      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+      <DependentUpon>TicketPrinterTest.cs</DependentUpon>
     </None>
-    <None Update="TheaterServiceTest.reserve_once_on_premiere_performance.approved.txt">
+    <None Update="TicketPrinterTest.reserve_once_on_premiere_performance.approved.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <DependentUpon>TicketPrinterTest.cs</DependentUpon>
     </None>
-    <None Update="TheaterServiceTest.reserve_once_on_premiere_performance_with_premium_category.approved.txt">
+    <None Update="TicketPrinterTest.reserve_once_on_premiere_performance_with_premium_category.approved.txt">
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
-      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+      <DependentUpon>TicketPrinterTest.cs</DependentUpon>
     </None>
-    <None Update="TheaterServiceTest.reserve_twice_on_premiere_performance.approved.txt">
+    <None Update="TicketPrinterTest.reserve_twice_on_premiere_performance.approved.txt">
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
-      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+      <DependentUpon>TicketPrinterTest.cs</DependentUpon>
     </None>
   </ItemGroup>
 

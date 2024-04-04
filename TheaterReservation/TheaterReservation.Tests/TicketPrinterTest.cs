@@ -1,14 +1,23 @@
 using ApprovalTests;
 using ApprovalTests.Reporters;
 using TheaterReservation.Data;
+using TheaterReservation.Exposition;
 
 namespace TheaterReservation.Tests
 {
     [UseReporter(typeof(DiffReporter))]
     [TestClass]
-    public class TheaterServiceTest
+    public class TicketPrinterTest
     {
-        TheaterService theaterService = new TheaterService();
+        private TicketPrinter ticketPrinter;
+        private TheaterService theaterService;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            theaterService = new TheaterService();
+            ticketPrinter = new TicketPrinter(theaterService);
+        }
 
         [TestMethod]
         public void Reserve_once_on_premiere_performance()
@@ -18,7 +27,7 @@ namespace TheaterReservation.Tests
             performance.play = "The CICD by Corneille";
             performance.startTime = new DateTime(2023, 04, 22, 21, 0, 0);
             performance.performanceNature = "PREMIERE";
-            String reservation = theaterService.Reservation(1L, 4, "STANDARD",
+            String reservation = ticketPrinter.Reservation(1L, 4, "STANDARD",
                 performance);
             Approvals.Verify(reservation);
         }
@@ -31,7 +40,7 @@ namespace TheaterReservation.Tests
             performance.play = "The CICD by Corneille";
             performance.startTime = new DateTime(2023, 04, 22, 21, 0, 0);
             performance.performanceNature = "PREMIERE";
-            String reservation = theaterService.Reservation(1L, 4, "PREMIUM",
+            String reservation = ticketPrinter.Reservation(1L, 4, "PREMIUM",
                 performance);
             Approvals.Verify(reservation);
         }
@@ -44,11 +53,11 @@ namespace TheaterReservation.Tests
             performance.play = "The CICD by Corneille";
             performance.startTime = new DateTime(2023, 04, 22, 21, 0, 0);
             performance.performanceNature = "PREMIERE";
-            String reservation1 = theaterService.Reservation(1L, 1, "STANDARD",
+            String reservation1 = ticketPrinter.Reservation(1L, 1, "STANDARD",
                 performance);
             List<string> seats = new List<string> { "B2" };
             theaterService.CancelReservation("123456", 1L, seats);
-            String reservation = theaterService.Reservation(1L, 4, "STANDARD",
+            String reservation = ticketPrinter.Reservation(1L, 4, "STANDARD",
                 performance);
             Approvals.Verify(reservation);
         }
@@ -61,9 +70,9 @@ namespace TheaterReservation.Tests
             performance.play = "The CICD by Corneille";
             performance.startTime = new DateTime(2023, 04, 22, 21, 0, 0);
             performance.performanceNature = "PREMIERE";
-            String reservation1 = theaterService.Reservation(1L, 4, "STANDARD",
+            String reservation1 = ticketPrinter.Reservation(1L, 4, "STANDARD",
                 performance);
-            String reservation2 = theaterService.Reservation(1L, 5, "STANDARD",
+            String reservation2 = ticketPrinter.Reservation(1L, 5, "STANDARD",
                 performance);
             Approvals.Verify(reservation2);
         }
@@ -77,7 +86,7 @@ namespace TheaterReservation.Tests
             performance.startTime = new DateTime(2023, 03, 21, 21, 0, 0);
             performance.performanceNature = "PREVIEW";
 
-            String reservation = theaterService.Reservation(2L, 4, "STANDARD",
+            String reservation = ticketPrinter.Reservation(2L, 4, "STANDARD",
                 performance);
             Approvals.Verify(reservation);
         }
@@ -91,7 +100,7 @@ namespace TheaterReservation.Tests
             performance.startTime = new DateTime(2023, 03, 21, 21, 0, 0);
             performance.performanceNature = "PREMIERE";
 
-            String reservation = theaterService.Reservation(2L, 4, "STANDARD",
+            String reservation = ticketPrinter.Reservation(2L, 4, "STANDARD",
                 performance);
             Approvals.Verify(reservation);
         }
