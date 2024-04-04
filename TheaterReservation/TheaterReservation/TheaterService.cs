@@ -77,7 +77,7 @@ public class TheaterService
 
         var vipQuota = GetVipQuota(performance);
 
-        if (remainingSeats < totalSeats * vipQuota)
+        if (new AllocationQuotaPredicate(remainingSeats, totalSeats, vipQuota).CanReserve())
         {
             reservedSeats = new List<ReservationSeat>();
         }
